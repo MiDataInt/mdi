@@ -135,6 +135,9 @@ if [ "$ACTION_NUMBER" = "1" ]; then
     JOB_MANAGER_DIR=$FRAMEWORKS_DIR/$PIPELINES_FRAMEWORK/job_manager
     perl $JOB_MANAGER_DIR/initialize.pl $MDI_DIR
 
+    # finish up
+    echo DONE
+
 # -----------------------------------------------------------------------
 # Stage 2 apps requested; use full mdi::install() from the mdi-manager R package
 # -----------------------------------------------------------------------
@@ -143,4 +146,5 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
     Rscript -e "install.packages('remotes', repos = '$CRAN_REPO')"  
     Rscript -e "remotes::install_github('MiDataInt/mdi-manager')"  
     Rscript -e "mdi::install('$MDI_DIR', confirm = FALSE)"
+    echo DONE
 fi
