@@ -1,0 +1,8 @@
+# ignore _everything_ that gets placed into the mdi root folder
+*
+
+# _except_ the files explicitly declared to be part of this installer repository
+!.gitignore
+!install.sh
+!LICENSE
+!README.md
