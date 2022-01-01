@@ -5,19 +5,18 @@ is a framework for developing, installing and running a variety of
 HPC data analysis pipelines and interactive R Shiny data visualization 
 applications within a standardized design and implementation interface.
 
-## Repository contents
-
-Data analysis in the MDI is logically separated into 
+Data analysis in the MDI is separated into 
 [two stages of code execution](https://midataint.github.io/docs/analysis-flow/) 
 called Stage 1 HPC **pipelines** and Stage 2 web applications (i.e., **apps**).
 Collectively, pipelines and apps are referred to as **tools**.
+Please read the [MDI documentation](https://midataint.github.io/) for 
+more information.
+
+## Repository contents
 
 This repository carries a single **installation script** that will 
 set up the MDI on your computer with all required components and a proper
 folder structure to support all available tools.
-
-Please read the [MDI documentation](https://midataint.github.io/) for 
-more information.
 
 ## System requirements
 
@@ -94,7 +93,8 @@ from within the Stage 2 web server.
 
 The installation process above added the 'mdi' utility
 to your MDI installation folder. You can use it to run
-any pipeline. For help from the command line, simply call and work from there:
+any pipeline. For help from the command line, simply call
+the utility with no arguments:
 
 ```bash
 mdi
