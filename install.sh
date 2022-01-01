@@ -18,7 +18,7 @@ cd $MDI_DIR
 # prompt for the requested installation action
 # -----------------------------------------------------------------------
 echo
-echo "Welcome to the Michigan Data Interface installation utility."
+echo "Welcome to the Michigan Data Interface installer."
 echo
 echo "What would you like to install?"
 echo
@@ -26,11 +26,13 @@ echo "  1 - MDI Stage 1 pipelines only; Stage2 apps will be skipped"
 echo "  2 - both Stage 1 pipelines and Stage 2 apps (requires R in PATH)"
 echo "  3 - exit and do nothing"
 echo
-echo "Please note that Stage 2 apps installation takes many minutes."
-echo "Select option 1 if you do not intend to use interactive web tools"
-echo "from this MDI installation."
+echo "Stage 2 apps installation takes many minutes. Select option 1 if you"
+echo "do not intend to use interactive web tools from this MDI installation."
 echo
-echo "For details, see: https://midataint.github.io/"
+echo "Installation will populate this directory and add it to PATH via ~/.bashrc"
+echo "  $MDI_DIR"
+echo
+echo "For more information, see: https://midataint.github.io/"
 echo
 echo "Select an action by its number: "
 read ACTION_NUMBER
@@ -59,28 +61,31 @@ if [ "$ACTION_NUMBER" = "1" ]; then
     echo "cloning/updating the mdi-manager repository"
     function updateRepo {
         PARENT_FOLDER=$1
-        REPO=$2
-        URL=$3
-        CHECKOUT=$4
-        FOLDER=$PARENT_FOLDER/$REPO
+        GIT_REPO=$2
+        CHECKOUT=$3
+        REPO_NAME=`echo $GIT_REPO | sed 's/.*\///'`
+        FOLDER=$PARENT_FOLDER/$REPO_NAME
+        echo $FOLDER
         if [ -d $FOLDER ]; then
             cd $FOLDER
             git checkout main
             git pull
         else
             cd $PARENT_FOLDER
-            git clone $URL
-            cd $REPO
+            git clone https://github.com/$GIT_REPO.git
+            if [ $? -ne 0 ]; then exit 1; fi
+            cd $REPO_NAME
         fi
         if [ "$CHECKOUT" = "latest" ]; then
             CHECKOUT=`git tag -l --sort=-v:refname | head -n1` # the latest tagged version
+            if [ "$CHECKOUT" = "" ]; then CHECKOUT="main"; fi
         fi
         echo "checking out $CHECKOUT"
         git checkout $CHECKOUT
         cd $MDI_DIR
     }
     MDI_MANAGER=mdi-manager
-    updateRepo $MDI_DIR $MDI_MANAGER https://github.com/MiDataInt/$MDI_MANAGER.git main
+    updateRepo $MDI_DIR MiDataInt/$MDI_MANAGER main
 
     # initialize the installation config files if missing, but do not overwrite existing
     echo "initializing config files"
@@ -129,11 +134,23 @@ if [ "$ACTION_NUMBER" = "1" ]; then
     echo "cloning/updating the mdi-pipelines-framework repository"
     PIPELINES_FRAMEWORK=mdi-pipelines-framework
     FRAMEWORKS_DIR=$MDI_DIR/frameworks/definitive
-    updateRepo $FRAMEWORKS_DIR $PIPELINES_FRAMEWORK https://github.com/MiDataInt/$PIPELINES_FRAMEWORK.git latest
+    updateRepo $FRAMEWORKS_DIR MiDataInt/$PIPELINES_FRAMEWORK latest
+
+    # clone/pull any tool suites from config.yml
+    echo "cloning/updating requested tool suites"
+    SUITES=`
+        grep -v "^\s*#" config/suites.yml | 
+        grep -v "^---" | 
+        sed -e 's/^\s*-\s*//' -e 's/suites:\s*//' -e 's/#.*//' -e "s/^https:\/\/github.com\///" -e "s/\.git$//" | 
+        grep "\S"
+    `
+    SUITES_DIR=$MDI_DIR/suites/definitive
+    for GIT_REPO in $SUITES; do updateRepo $SUITES_DIR $GIT_REPO latest; done
 
     # initialize the pipelines jobManager
     JOB_MANAGER_DIR=$FRAMEWORKS_DIR/$PIPELINES_FRAMEWORK/job_manager
     perl $JOB_MANAGER_DIR/initialize.pl $MDI_DIR
+    if [ $? -ne 0 ]; then exit 1; fi
 
     # finish up
     echo DONE
@@ -145,6 +162,6 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
     CRAN_REPO=https://repo.miserver.it.umich.edu/cran/
     Rscript -e "install.packages('remotes', repos = '$CRAN_REPO')"  
     Rscript -e "remotes::install_github('MiDataInt/mdi-manager')"  
-    Rscript -e "mdi::install('$MDI_DIR', confirm = FALSE)"
+    Rscript -e "mdi::install('$MDI_DIR', confirm = FALSE)" # permission was granted above
     echo DONE
 fi

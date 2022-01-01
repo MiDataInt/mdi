@@ -78,16 +78,29 @@ to complete.
 
 <code>install.sh</code> clones MDI repositories
 that define the pipeline and apps frameworks, but few actual
-tools. To install tools from any provider, run the following from the
-command line:
+tools. To install tools from any provider, first edit the file 
+'config/suites.yml' in the 'mdi' root directory.
 
-```bash
-mdi add https://github.com/GIT_USER/SUITE_NAME-mdi-tools.git
-mdi add GIT_USER/SUITE_NAME-mdi-tools # either format works
+```yml
+# mdi/config/suites.yml
+suites:
+    - https://github.com/GIT_USER/SUITE_NAME-mdi-tools.git
+    - GIT_USER/SUITE_NAME-mdi-tools # either format works
 ```
 
-Alternatively, you can edit suites.yml and install new suites
-from within the Stage 2 web server.
+Then call <code>install.sh</code> again to clone the listed
+repositories and install any additional R package dependencies.
+Repeat these steps any time you need to add a new tool suite
+to your MDI installation.
+
+Alternatively, if your installation includes Stage 2 apps,
+you can edit suites.yml and install new suites from within the 
+Stage 2 web server, or run the following from the command line:
+
+```bash
+mdi add -p -s https://github.com/GIT_USER/SUITE_NAME-mdi-tools.git
+mdi add -p -s GIT_USER/SUITE_NAME-mdi-tools # either format works
+```
 
 ## Run a Stage 1 pipeline from the command line
 
