@@ -17,25 +17,28 @@ cd $MDI_DIR
 # -----------------------------------------------------------------------
 # prompt for the requested installation action
 # -----------------------------------------------------------------------
-echo
-echo "Welcome to the Michigan Data Interface installer."
-echo
-echo "What would you like to install?"
-echo
-echo "  1 - MDI Stage 1 pipelines only; Stage2 apps will be skipped"
-echo "  2 - both Stage 1 pipelines and Stage 2 apps (requires R in PATH)"
-echo "  3 - exit and do nothing"
-echo
-echo "Stage 2 apps installation takes many minutes. Select option 1 if you"
-echo "do not intend to use interactive web tools from this MDI installation."
-echo
-echo "Installation will populate this directory and add it to PATH via ~/.bashrc"
-echo "  $MDI_DIR"
-echo
-echo "For more information, see: https://midataint.github.io/"
-echo
-echo "Select an action by its number: "
-read ACTION_NUMBER
+ACTION_NUMBER=$1
+if [ "$ACTION_NUMBER" = "" ]; then
+    echo
+    echo "Welcome to the Michigan Data Interface installer."
+    echo
+    echo "What would you like to install?"
+    echo
+    echo "  1 - MDI Stage 1 pipelines only; Stage2 apps will be skipped"
+    echo "  2 - both Stage 1 pipelines and Stage 2 apps (requires R in PATH)"
+    echo "  3 - exit and do nothing"
+    echo
+    echo "Stage 2 apps installation takes many minutes. Select option 1 if you"
+    echo "do not intend to use interactive web tools from this MDI installation."
+    echo
+    echo "Installation will populate this directory and add it to PATH via ~/.bashrc"
+    echo "  $MDI_DIR"
+    echo
+    echo "For more information, see: https://midataint.github.io/"
+    echo
+    echo "Select an action by its number: "
+    read ACTION_NUMBER
+fi
 echo
 
 # -----------------------------------------------------------------------
