@@ -129,7 +129,7 @@ if [ "$ACTION_NUMBER" = "1" ]; then
     if [ "$match" = "" ]; then
         echo "adding mdi directory to PATH via ~/.bashrc"
         bashRcContents="$bashRcContents\n\n$payload"
-        echo -e $bashRcContents | sed 's/\n\n\n/\n\n/g' > $bashRcFile
+        echo -e "$bashRcContents" | sed 's/\n\n\n/\n\n/g' > $bashRcFile
     fi
 
     # clone/pull the definitive pipelines framework repostory
