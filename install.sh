@@ -50,6 +50,7 @@ if [ "$ACTION_NUMBER" = "1" ]; then
     echo "initializing the MDI file tree"
     mkdir -p config # populated below
     mkdir -p data   # unused, this is a pipelines-only installation
+    mkdir -p containers   # populated by Stage 1 pipeline execution
     mkdir -p environments # populated by Stage 1 pipelines conda create
     mkdir -p frameworks/definitive      # populated below
     mkdir -p frameworks/developer-forks # unused, pipelines-only installation assumed to be an end user
