@@ -81,7 +81,13 @@ if [ "$ACTION_NUMBER" = "1" ]; then
             cd $REPO_NAME
         fi
         if [ "$CHECKOUT" = "latest" ]; then
-            CHECKOUT=`git tag -l --sort=-v:refname | head -n1` # the latest tagged version
+            CHECKOUT=`
+                git tag | 
+                grep -P '^v\d+\.\d+\.\d+' | 
+                sed -e 's/v//' -e s/\\./\\t/g | 
+                sort -k1,1nr -k2,2nr -k3,3nr | 
+                head -n1 | 
+                awk '{print "v"$1"."$2"."$3}'` # the latest tagged version, method robust to all contingencies
             if [ "$CHECKOUT" = "" ]; then CHECKOUT="main"; fi
         fi
         echo "checking out $CHECKOUT"
