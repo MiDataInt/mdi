@@ -84,11 +84,11 @@ if [ "$ACTION_NUMBER" = "1" ]; then
             CHECKOUT=`
                 git tag | 
                 grep -P '^v\d+\.\d+\.\d+' | 
-                sed -e 's/v//' -e s/\\./\\t/g | 
+                sed -e 's/v//' -e 's/\\./\\t/g' | 
                 sort -k1,1nr -k2,2nr -k3,3nr | 
                 head -n1 | 
                 awk '{print "v"$1"."$2"."$3}'` # the latest tagged version, method robust to all contingencies
-            if [ "$CHECKOUT" = "" ]; then CHECKOUT="main"; fi
+		if [ "$CHECKOUT" = "" ]; then CHECKOUT="main"; fi
         fi
         echo "checking out $CHECKOUT"
         git checkout $CHECKOUT
