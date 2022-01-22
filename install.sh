@@ -91,7 +91,7 @@ if [ "$ACTION_NUMBER" = "1" ]; then
 		if [ "$CHECKOUT" = "" ]; then CHECKOUT="main"; fi
         fi
         echo "checking out $CHECKOUT"
-        git checkout $CHECKOUT
+        git -c advice.detachedHead=false checkout $CHECKOUT
         cd $MDI_DIR
     }
     MDI_MANAGER=mdi-manager
