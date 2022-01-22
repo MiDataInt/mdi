@@ -174,8 +174,10 @@ if [ "$ACTION_NUMBER" = "1" ]; then
 # -----------------------------------------------------------------------
 elif [ "$ACTION_NUMBER" = "2" ]; then
     CRAN_REPO=https://repo.miserver.it.umich.edu/cran/
+    ADD_TO_PATH="FALSE"
+    if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then ADD_TO_PATH="TRUE"; fi
     Rscript -e "install.packages('remotes', repos = '$CRAN_REPO')"  
     Rscript -e "remotes::install_github('MiDataInt/mdi-manager')"  
-    Rscript -e "mdi::install('$MDI_DIR', confirm = FALSE)" # permission was granted above
+    Rscript -e "mdi::install('$MDI_DIR', confirm = FALSE, addToPATH = $ADD_TO_PATH)" # permission was granted above
     echo DONE
 fi
