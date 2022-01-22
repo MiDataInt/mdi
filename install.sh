@@ -117,27 +117,31 @@ if [ "$ACTION_NUMBER" = "1" ]; then
     cp -f $MDI_MANAGER/inst/mdi mdi   
     chmod ug+x mdi 
 
-    # add MDI_DIR to PATH via ~/.bashrc; do not overwrite if already present
-    echo "checking for mdi directory in PATH"
-    head="# >>> mdi initialize >>>"
-    notice="# !! Contents within this block are managed by 'mdi initialize' !!"
-    path='export PATH='$MDI_DIR':$PATH'
-    tail="# <<< mdi initialize <<<"
-    payload="$head\n$notice\n$path\n$tail"
-    bashRcFile=~/.bashrc
-    bashRcBackup=$bashRcFile.mdi-backup
-    bashRcContents=""
-    match=""
-    if [ -e $bashRcFile ]; then 
-        cp $bashRcFile $bashRcBackup
-        bashRcContents=`sed 's/\r//g' $bashRcFile`
-        match=`grep "$head" $bashRcFile`
+    # add MDI_DIR to PATH via ~/.bashrc
+    # do not overwrite if already present or SUPPRESS_MDI_BASHRC is set
+    if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then
+        echo "checking for mdi directory in PATH"
+        head="# >>> mdi initialize >>>"
+        notice="# !! Contents within this block are managed by 'mdi initialize' !!"
+        path='export PATH='$MDI_DIR':$PATH'
+        tail="# <<< mdi initialize <<<"
+        payload="$head\n$notice\n$path\n$tail"
+        bashRcFile=~/.bashrc
+        bashRcBackup=$bashRcFile.mdi-backup
+        bashRcContents=""
+        match=""
+        if [ -e $bashRcFile ]; then 
+            cp $bashRcFile $bashRcBackup
+            bashRcContents=`sed 's/\r//g' $bashRcFile`
+            match=`grep "$head" $bashRcFile`
+        fi
+        if [ "$match" = "" ]; then
+            echo "adding mdi directory to PATH via ~/.bashrc"
+            bashRcContents="$bashRcContents\n\n$payload"
+            echo -e "$bashRcContents" | sed 's/\n\n\n/\n\n/g' > $bashRcFile
+        fi
     fi
-    if [ "$match" = "" ]; then
-        echo "adding mdi directory to PATH via ~/.bashrc"
-        bashRcContents="$bashRcContents\n\n$payload"
-        echo -e "$bashRcContents" | sed 's/\n\n\n/\n\n/g' > $bashRcFile
-    fi
+
 
     # clone/pull the definitive pipelines framework repostory
     # apps framework not needed as this is a pipelines-only installation
