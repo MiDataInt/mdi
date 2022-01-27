@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #---------------------------------------------------------------------------
 # MDI command line installation utility
 #---------------------------------------------------------------------------
@@ -22,7 +24,7 @@ if [ "$ACTION_NUMBER" = "" ]; then
     echo
     echo "Welcome to the Michigan Data Interface installer."
     echo
-    echo "Stage 2 apps installation takes many minutes. Select option 1 if you"
+    echo "Stage 2 apps installation may take many minutes. Select option 1 if you"
     echo "do not intend to use interactive web tools from this MDI installation."
     echo
     echo "Installation will populate this directory and add it to PATH via ~/.bashrc"
@@ -33,18 +35,17 @@ if [ "$ACTION_NUMBER" = "" ]; then
     echo "What would you like to install?"
     echo
     echo "  1 - MDI Stage 1 pipelines only; Stage2 apps will be skipped"
-    echo "  2 - both Stage 1 pipelines and Stage 2 apps (requires R in PATH)"
+    echo "  2 - both Stage 1 pipelines and Stage 2 apps (requires R or Singularity)"
     echo "  3 - exit and do nothing"
     echo
-    echo "Select an action by its number: "
-    read ACTION_NUMBER
+    read -p "Select an action by its number: " ACTION_NUMBER
 fi
 echo
 
 # -----------------------------------------------------------------------
-# install Stage 1 pipelines only; R is not required
+# function to install Stage 1 pipelines without requiring system R
 # -----------------------------------------------------------------------
-if [ "$ACTION_NUMBER" = "1" ]; then
+function install_pipelines_no_R {
 
     # initialize the MDI directory tree
     echo "initializing the MDI file tree"
@@ -142,7 +143,6 @@ if [ "$ACTION_NUMBER" = "1" ]; then
         fi
     fi
 
-
     # clone/pull the definitive pipelines framework repostory
     # apps framework not needed as this is a pipelines-only installation
     echo "cloning/updating the mdi-pipelines-framework repository"
@@ -165,19 +165,92 @@ if [ "$ACTION_NUMBER" = "1" ]; then
     JOB_MANAGER_DIR=$FRAMEWORKS_DIR/$PIPELINES_FRAMEWORK/job_manager
     perl $JOB_MANAGER_DIR/initialize.pl $MDI_DIR
     if [ $? -ne 0 ]; then exit 1; fi
+}
 
-    # finish up
+# -----------------------------------------------------------------------
+# function to check for valid singularity
+# -----------------------------------------------------------------------
+function check_singularity {
+    export SINGULARITY_VERSION=`singularity --version 2>/dev/null | grep -P '^singularity.+version.+'`
+}
+
+# -----------------------------------------------------------------------
+# install Stage 1 pipelines only; R is not required
+# -----------------------------------------------------------------------
+if [ "$ACTION_NUMBER" = "1" ]; then
+    install_pipelines_no_R
     echo DONE
 
 # -----------------------------------------------------------------------
-# Stage 2 apps requested; use full mdi::install() from the mdi-manager R package
+# Stage 2 apps requested - determine how to install (container vs. system R)
 # -----------------------------------------------------------------------
 elif [ "$ACTION_NUMBER" = "2" ]; then
-    CRAN_REPO=https://repo.miserver.it.umich.edu/cran/
-    ADD_TO_PATH="FALSE"
-    if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then ADD_TO_PATH="TRUE"; fi
-    Rscript -e "install.packages('remotes', repos = '$CRAN_REPO')"  
-    Rscript -e "remotes::install_github('MiDataInt/mdi-manager')"  
-    Rscript -e "mdi::install('$MDI_DIR', confirm = FALSE, addToPATH = $ADD_TO_PATH)" # permission was granted above
-    echo DONE
+
+    # MDI_FORCE_SYSTEM_INSTALL is set by build-suite-common-def
+    if [ "$MDI_FORCE_SYSTEM_INSTALL" = "" ]; then
+
+        # use system singularity if present
+        check_singularity 
+
+        # otherwise attempt to load it
+        if [ "$SINGULARITY_VERSION" = "" ]; then 
+            CONFIG_FILE=$MDI_DIR/config/singularity.yml
+            if [ -f $CONFIG_FILE ]; then
+                LOAD_COMMAND=`grep -P '^load-command:\s+' $CONFIG_FILE | sed -e 's/\"//g' -e 's/load-command:\s*//' | grep -v null | grep -v '~'`
+                if [ "$LOAD_COMMAND" != "" ]; then
+                    $LOAD_COMMAND > /dev/null 2>&1
+                    check_singularity
+                fi
+            fi
+        fi
+    fi
+
+# -----------------------------------------------------------------------
+# Singularity not found: use full system-R mdi::install() from mdi-manager package
+# this path forced by MDI_FORCE_SYSTEM_INSTALL during container build
+# -----------------------------------------------------------------------
+    if [ "$SINGULARITY_VERSION" = "" ]; then 
+        CRAN_REPO=https://repo.miserver.it.umich.edu/cran/
+        ADD_TO_PATH="FALSE"
+        if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then ADD_TO_PATH="TRUE"; fi
+        Rscript -e "install.packages('remotes', repos = '$CRAN_REPO')"  
+        Rscript -e "remotes::install_github('MiDataInt/mdi-manager')"  
+        Rscript -e "mdi::install('$MDI_DIR', confirm = FALSE, addToPATH = $ADD_TO_PATH)" # permission was granted above
+        echo DONE
+
+# -----------------------------------------------------------------------
+# Singularity found: use mdi-singularity-base to install only missing packages
+# -----------------------------------------------------------------------
+    else 
+
+        # query for the required R version if not provided in environment
+        if [ "$MDI_R_VERSION" = "" ]; then
+            echo
+            echo "Singularity is available on system and will be used to speed"
+            echo "installation of Stage 2 apps."
+            echo
+            echo "The installer needs to know which R version container to download."
+            echo
+            read -p "Please enter a major.minor R version (e.g., 4.1): " MDI_R_VERSION
+        fi
+
+        # install Stage 1
+        install_pipelines_no_R
+
+        # pull the container base image
+        BASE_NAME=mdi-singularity-base
+        CONTAINERS_DIR=$MDI_DIR/containers
+        IMAGE_DIR=$CONTAINERS_DIR/$BASE_NAME
+        mkdir -p $IMAGE_DIR
+        IMAGE_FILE=$IMAGE_DIR/$BASE_NAME-$MDI_R_VERSION.sif
+        IMAGE_URI=oras://ghcr.io/MiDataInt/$BASE_NAME:$MDI_R_VERSION
+        if [ ! -f $IMAGE_FILE ]; then
+            singularity pull $IMAGE_FILE $IMAGE_URI
+        fi
+        
+        # run mdi::install() within a base container instance with bind-mount to $MDI_DIR
+        # R Shiny library comes from container, suite packages compiled by container into containers/library
+        singularity run --bind $MDI_DIR:/srv/active/mdi $IMAGE_URI install
+        echo DONE
+    fi
 fi
