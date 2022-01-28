@@ -143,12 +143,13 @@ function install_pipelines_no_R {
         fi
     fi
 
-    # clone/pull the definitive pipelines framework repostory
-    # apps framework not needed as this is a pipelines-only installation
-    echo "cloning/updating the mdi-pipelines-framework repository"
+    # clone/pull the definitive framework repositories
+    echo "cloning/updating the mdi framework repositories"
     PIPELINES_FRAMEWORK=mdi-pipelines-framework
+    APPS_FRAMEWORK=mdi-apps-framework
     FRAMEWORKS_DIR=$MDI_DIR/frameworks/definitive
     updateRepo $FRAMEWORKS_DIR MiDataInt/$PIPELINES_FRAMEWORK latest
+    updateRepo $FRAMEWORKS_DIR MiDataInt/$APPS_FRAMEWORK latest
 
     # clone/pull any tool suites from config.yml
     echo "cloning/updating requested tool suites"
@@ -170,8 +171,21 @@ function install_pipelines_no_R {
 # -----------------------------------------------------------------------
 # function to check for valid singularity
 # -----------------------------------------------------------------------
-function check_singularity {
+function set_singularity_version_ {
     export SINGULARITY_VERSION=`singularity --version 2>/dev/null | grep -P '^singularity.+version.+'`
+}
+function set_singularity_version {
+    set_singularity_version_ # use system singularity if present
+    if [ "$SINGULARITY_VERSION" = "" ]; then # otherwise attempt to load it
+        CONFIG_FILE=$MDI_DIR/config/singularity.yml
+        if [ -f $CONFIG_FILE ]; then
+            LOAD_COMMAND=`grep -P '^load-command:\s+' $CONFIG_FILE | sed -e 's/\"//g' -e 's/load-command:\s*//' | grep -v null | grep -v '~'`
+            if [ "$LOAD_COMMAND" != "" ]; then
+                $LOAD_COMMAND > /dev/null 2>&1
+                set_singularity_version_
+            fi
+        fi
+    fi 
 }
 
 # -----------------------------------------------------------------------
@@ -185,24 +199,8 @@ if [ "$ACTION_NUMBER" = "1" ]; then
 # Stage 2 apps requested - determine how to install (container vs. system R)
 # -----------------------------------------------------------------------
 elif [ "$ACTION_NUMBER" = "2" ]; then
-
-    # MDI_FORCE_SYSTEM_INSTALL is set by build-suite-common-def
     if [ "$MDI_FORCE_SYSTEM_INSTALL" = "" ]; then
-
-        # use system singularity if present
-        check_singularity 
-
-        # otherwise attempt to load it
-        if [ "$SINGULARITY_VERSION" = "" ]; then 
-            CONFIG_FILE=$MDI_DIR/config/singularity.yml
-            if [ -f $CONFIG_FILE ]; then
-                LOAD_COMMAND=`grep -P '^load-command:\s+' $CONFIG_FILE | sed -e 's/\"//g' -e 's/load-command:\s*//' | grep -v null | grep -v '~'`
-                if [ "$LOAD_COMMAND" != "" ]; then
-                    $LOAD_COMMAND > /dev/null 2>&1
-                    check_singularity
-                fi
-            fi
-        fi
+        set_singularity_version
     fi
 
 # -----------------------------------------------------------------------
@@ -229,7 +227,7 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
             echo "Singularity is available on system and will be used to speed"
             echo "installation of Stage 2 apps."
             echo
-            echo "The installer needs to know which R version container to download."
+            echo "The installer needs to know which R-versioned container to download."
             echo
             read -p "Please enter a major.minor R version (e.g., 4.1): " MDI_R_VERSION
         fi
@@ -248,9 +246,9 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
             singularity pull $IMAGE_FILE $IMAGE_URI
         fi
         
-        # run mdi::install() within a base container instance with bind-mount to $MDI_DIR
+        # run mdi::extend() within a base container instance with bind-mount to $MDI_DIR
         # R Shiny library comes from container, suite packages compiled by container into containers/library
-        singularity run --bind $MDI_DIR:/srv/active/mdi $IMAGE_URI install
+        singularity run --bind $MDI_DIR:/srv/active/mdi $IMAGE_FILE extend
         echo DONE
     fi
 fi
