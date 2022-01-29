@@ -212,10 +212,13 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
         ADD_TO_PATH="FALSE"
         if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then ADD_TO_PATH="TRUE"; fi
         Rscript -e \
-            "x <- 'remotes'; \
-            Ncpus <- Sys.getenv('N_CPU'); \
-            if(Ncpus == '') Ncpus <- 1; \
-            if (!require(x, character.only = TRUE)) install.packages(x, repos = '$CRAN_REPO', Ncpus = Ncpus)"  
+"x <- 'remotes'; \
+if (!require(x, character.only = TRUE)){ \
+    Ncpus <- Sys.getenv('N_CPU'); \
+    if(Ncpus == '') Ncpus <- 1; \
+    message(paste('Ncpus =', Ncpus)); \
+    install.packages(x, repos = '$CRAN_REPO', Ncpus = Ncpus) \
+}"
         Rscript -e "remotes::install_github('MiDataInt/mdi-manager')"  
         Rscript -e "mdi::install('$MDI_DIR', confirm = FALSE, addToPATH = $ADD_TO_PATH)" # permission was granted above
         echo DONE
