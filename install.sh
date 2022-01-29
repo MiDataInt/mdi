@@ -248,6 +248,7 @@ if (!require(x, character.only = TRUE)){ \
             echo
             read -p "Please enter a major.minor R version (e.g., 4.1): " MDI_R_VERSION
         fi
+        MDI_R_VERSION="v$MDI_R_VERSION"
 
         # install Stage 1
         install_pipelines_no_R
