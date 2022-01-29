@@ -160,7 +160,13 @@ function install_pipelines_no_R {
         grep "\S"
     `
     SUITES_DIR=$MDI_DIR/suites/definitive
-    for GIT_REPO in $SUITES; do updateRepo $SUITES_DIR $GIT_REPO latest; done
+    for GIT_REPO in $SUITES; do 
+        REPO_VERSION=latest # checkout latest unless a version-specific suite-centric build/install
+        if [ "$GIT_REPO" = "$GIT_USER/$SUITE_NAME" ] && [ "$SUITE_VERSION" != "" ]; then 
+            REPO_VERSION=$SUITE_VERSION
+        fi
+        updateRepo $SUITES_DIR $GIT_REPO $REPO_VERSION
+    done
 
     # initialize the pipelines jobManager
     JOB_MANAGER_DIR=$FRAMEWORKS_DIR/$PIPELINES_FRAMEWORK/job_manager
@@ -211,6 +217,10 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
         CRAN_REPO=https://repo.miserver.it.umich.edu/cran/
         ADD_TO_PATH="FALSE"
         if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then ADD_TO_PATH="TRUE"; fi
+        CHECKOUT="NULL"
+        if [[ "$SUITE_NAME" != "" && "$SUITE_VERSION" != "" ]]; then
+            CHECKOUT="list(suites = list('$SUITE_NAME' = '$SUITE_VERSION'))"
+        fi
         Rscript -e \
 "x <- 'remotes'; \
 if (!require(x, character.only = TRUE)){ \
@@ -220,7 +230,7 @@ if (!require(x, character.only = TRUE)){ \
     install.packages(x, repos = '$CRAN_REPO', Ncpus = Ncpus) \
 }"
         Rscript -e "remotes::install_github('MiDataInt/mdi-manager')"  
-        Rscript -e "mdi::install('$MDI_DIR', confirm = FALSE, addToPATH = $ADD_TO_PATH)" # permission was granted above
+        Rscript -e "mdi::install('$MDI_DIR', confirm = FALSE, addToPATH = $ADD_TO_PATH, checkout=$CHECKOUT)" # permission was granted above
         echo DONE
 
 # -----------------------------------------------------------------------
