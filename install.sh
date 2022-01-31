@@ -172,6 +172,9 @@ function install_pipelines_no_R {
     JOB_MANAGER_DIR=$FRAMEWORKS_DIR/$PIPELINES_FRAMEWORK/job_manager
     perl $JOB_MANAGER_DIR/initialize.pl $MDI_DIR
     if [ $? -ne 0 ]; then exit 1; fi
+
+    # remove tmp mdi-manager clone used for source files - the R mdi package is installed from GitHub
+    rm -rf $MDI_MANAGER
 }
 
 # -----------------------------------------------------------------------
