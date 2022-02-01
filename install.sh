@@ -248,6 +248,7 @@ if (!require(x, character.only = TRUE)){ \
             echo "installation of Stage 2 apps."
             echo
             echo "The installer needs to know which R-versioned container to download."
+            echo "https://github.com/MiDataInt/mdi-singularity-base/pkgs/container/mdi-singularity-base"
             echo
             read -p "Please enter a major.minor R version (e.g., 4.1): " MDI_R_VERSION
         fi
