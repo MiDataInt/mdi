@@ -9,55 +9,48 @@ Data analysis in the MDI is separated into
 [two stages of code execution](https://midataint.github.io/docs/analysis-flow/) 
 called Stage 1 HPC **pipelines** and Stage 2 web applications (i.e., **apps**).
 Collectively, pipelines and apps are referred to as **tools**.
-Please read the [MDI documentation](https://midataint.github.io/) for 
-more information.
 
 ## Repository contents
 
 This repository carries a single **installation script** that will 
 set up the MDI on your computer with all required components and a proper
-folder structure to support all available tools.
+folder structure to support all tools.
 
 ## System requirements
 
-The script in this repository offers two installation modes, with 
-differing requirements.
+The MDI offers two installation levels, with differing system requirements.
 
 ### Stage 1 Pipelines - Git dependency only
 
 Some users might only run Stage 1 pipelines on an HPC server.
-Selecting this installation mode will skip Stage 2 apps 
-and directly clone the required MDI repositories. Accordingly, Git must 
-be installed on the host machine. See:
+This installation level skips Stage 2 apps 
+and directly clones the required MDI repositories. Accordingly, Git must 
+be installed on the host machine.
 
-- <https://git-scm.com/>
+- Git: <https://git-scm.com/>
 
-### Stage 2 Pipelines plus Stage 2 Apps - additional R dependency
+Optionally, you can also run some pipelines in Singularity containers (see link below).
 
-Stage 2 web apps are R Shiny programs. Accordingly, 
-R must be installed on the host machine to use them. See:
+### Stage 2 Pipelines plus Stage 2 Apps - additional R / Singularity dependency
 
-- <https://www.r-project.org/>
+Stage 2 web apps are R Shiny programs. R might run on the host machine
+directly, or within a Singularity container. Therefore, either R or
+Singularity (but not both) must be installed.
+Git is still required to download this installer repository.
 
-We recommend updating to the latest stable R release prior
-to installing the MDI, as MDI installations are tied to specific 
-releases of R (hint: you can install multiple R versions on your 
-computer).
+- R: <https://www.r-project.org/>
+- Singularity: <https://sylabs.io/>
 
-Even if R will be used to complete the MDI installation, Git is still
-required to download this installer repository to your computer.
+### Running Stage 2 Apps on your desktop or laptop
 
-### Running on Windows - Git Bash
+The Stage 2 web server runs perfectly well on Windows or Mac computers,
+but this installation script will not be useful. Instead,
+either install the MDI using the R 'mdi-manager' package, or download a customized batch script to install and run the server:
 
-The MDI installation utility is a bash script. To use it on Windows, 
-please install and use Git Bash to expose an appropriate terminal.
+- MDI manager: <https://github.com/MiDataInt/mdi-manager.git>
+- batch script generator: <https://wilsonte-umich.shinyapps.io/mdi-script-generator>
 
-- <https://gitforwindows.org/>
 
-Even better, bypass the utility in this repository 
-entirely by creating and downloading a customized installation script here:
-
-- <https://wilsonte-umich.shinyapps.io/mdi-script-generator>
 
 ## Install the MDI framework(s)
 
@@ -71,14 +64,19 @@ cd mdi
 ```
 
 Please read the menu options and confirm your installation choice.
-A full installation, including Stage 2 apps, will take many minutes 
+A full installation, including Stage 2 apps, can take many minutes 
 to complete.
+
+If you will use containers but need to provide an atypical
+command to load Singularity, please initially select installation 
+level 1 (pipelines only), then edit file 'config/singularity.yml'
+and re-run the installer as needed. 
 
 ## Configure and install tool suites
 
 <code>install.sh</code> clones MDI repositories
 that define the pipeline and apps frameworks, but few actual
-tools. To install tools from any provider, first edit the file 
+tools. To install tools from any provider, first edit file 
 'config/suites.yml' in the 'mdi' root directory.
 
 ```yml
@@ -90,21 +88,20 @@ suites:
 
 Then call <code>install.sh</code> again to clone the listed
 repositories and install any additional R package dependencies.
-Repeat these steps any time you need to add a new tool suite
-to your MDI installation.
+Repeat these steps to add additional tool suites to your MDI installation.
 
-Alternatively, if your installation includes Stage 2 apps,
-you can edit suites.yml and install new suites from within the 
-Stage 2 web server, or run the following from the command line:
+Alternatively, you can edit suites.yml and install new suites from within 
+the Stage 2 web server, or run the following from the command line:
 
 ```bash
-mdi add -p -s https://github.com/GIT_USER/SUITE_NAME-mdi-tools.git
-mdi add -p -s GIT_USER/SUITE_NAME-mdi-tools # either format works
+mdi add --help
+mdi add -s https://github.com/GIT_USER/SUITE_NAME-mdi-tools.git
+mdi add -s GIT_USER/SUITE_NAME-mdi-tools # either format works
 ```
 
 ## Run a Stage 1 pipeline from the command line
 
-The installation process above added the 'mdi' utility
+The installation process adds the 'mdi' utility
 to your MDI installation folder. You can use it to run
 any pipeline. For help from the command line, simply call
 the utility with no arguments:
@@ -115,12 +112,9 @@ mdi
 
 ## Run the MDI web server
 
-If desired, run the Stage 2 apps web server as follows:
+Run the Stage 2 apps web server as follows - in a few seconds a web browser will open and you will be ready to load your data and run an associated app.
 
 ```bash
 mdi run --help
 mdi run
 ```
-
-In a few seconds a web browser will open and you will be ready to 
-load your data and run an associated app.
