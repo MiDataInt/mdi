@@ -52,6 +52,9 @@ function install_pipelines_no_R {
     mkdir -p config # populated below
     mkdir -p data   # unused, this is a pipelines-only installation
     mkdir -p containers   # populated by Stage 1 pipeline execution
+    if [ "$SUITE_NAME" != "" ]; then 
+        mkdir -p containers/$SUITE_NAME/library
+    fi
     mkdir -p environments # populated by Stage 1 pipelines conda create
     mkdir -p frameworks/definitive      # populated below
     mkdir -p frameworks/developer-forks # unused, pipelines-only installation assumed to be an end user
