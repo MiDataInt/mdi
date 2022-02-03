@@ -224,6 +224,16 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
         if [[ "$SUITE_NAME" != "" && "$SUITE_VERSION" != "" ]]; then
             CHECKOUT="list(suites = list('$SUITE_NAME' = '$SUITE_VERSION'))"
         fi
+        # note: we do not offer "config >> R_load_command" as it can make R version tracking ambiguous
+        # most users have R pre-installed, otherwise they must pre-execute a command to load it
+        # local batch scripts do allow users to specify an R load command in a wrapper of this script
+        R_COMMAND=`command -v Rscript`
+        if [ "$R_COMMAND" = "" ]; then
+            echo -e "\nFATAL: R program targets not found"
+            echo -e "please install or load R (or Singularity) as required on your system"
+            echo -e "e.g., module load R/0.0.0\n"
+            exit 1
+        fi
         Rscript -e \
 "x <- 'remotes'; \
 if (!require(x, character.only = TRUE)){ \
@@ -257,16 +267,14 @@ if (!require(x, character.only = TRUE)){ \
         # install Stage 1
         install_pipelines_no_R
 
-        # pull the container base image
+        # (re)pull the container base image
         BASE_NAME=mdi-singularity-base
         CONTAINERS_DIR=$MDI_DIR/containers
         IMAGE_DIR=$CONTAINERS_DIR/$BASE_NAME
         mkdir -p $IMAGE_DIR
         IMAGE_FILE=$IMAGE_DIR/$BASE_NAME-$MDI_R_VERSION.sif
         IMAGE_URI=oras://ghcr.io/MiDataInt/$BASE_NAME:$MDI_R_VERSION
-        if [ ! -f $IMAGE_FILE ]; then
-            singularity pull $IMAGE_FILE $IMAGE_URI
-        fi
+        singularity pull $IMAGE_FILE $IMAGE_URI
         
         # run mdi::extend() within a base container instance with bind-mount to $MDI_DIR
         # R Shiny library comes from container, suite packages compiled by container into containers/library
