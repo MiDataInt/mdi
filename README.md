@@ -29,8 +29,6 @@ be installed on the host machine.
 
 - Git: <https://git-scm.com/>
 
-Optionally, you can also run some pipelines in Singularity containers (see link below).
-
 ### Stage 2 Pipelines plus Stage 2 Apps - additional R / Singularity dependency
 
 Stage 2 web apps are R Shiny programs. R might run on the host machine
@@ -65,12 +63,12 @@ cd mdi
 
 Please read the menu options and confirm your installation choice.
 A full installation, including Stage 2 apps, can take many minutes 
-to complete.
+to complete if not using containers.
 
 If you will use containers but need to provide an atypical
 command to load Singularity, please initially select installation 
 level 1 (pipelines only), then edit file 'config/singularity.yml'
-and re-run the installer as needed. 
+and re-run the installer. 
 
 ## Configure and install tool suites
 
@@ -118,3 +116,49 @@ Run the Stage 2 apps web server as follows - in a few seconds a web browser will
 mdi run --help
 mdi run
 ```
+
+## Install and use repository developer forks
+
+Code developers often maintain forks of MDI framework and tool suite
+repositories in their GitHub account. To install your forks alongside the definitive
+repositories, first make sure R is installed and loaded:
+
+```bash
+# example for UM Great Lakes
+module load R/4.1.0
+```
+
+Next, provide a 
+[GithHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+by setting environment variable GITHUB_PAT or 
+creating file '~/gitCredentials.R' or'mdi/gitCredentials.R':
+
+```r
+# ~/gitCredentials.R
+gitCredentials <- list(
+    USER_NAME  = "First Name",
+    USER_EMAIL = "namef@umich.edu",
+    GIT_USER   = "xxx",
+    GITHUB_PAT = "xxx"
+)
+```
+
+After running <code>install.sh</code> as described above, re-run 
+the installation as follows, which calls the <code>mdi::install()</code>
+R function capable of installing forked repos.
+
+```bash
+./mdi install --forks # Stage 1 pipelines only
+./mdi install --forks --install-packages # Stage 1 and Stage 2
+```
+
+Finally, add the 'develop' flag to your 'mdi' calls, which will
+use any forked repositories from your GitHub account, or, if you have no forks,
+the tip of the main branch of the definitive repository (instead of a versioned release commit).
+
+```bash
+mdi -d ...
+mdi --develop ...
+```
+
+

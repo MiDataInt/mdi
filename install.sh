@@ -43,9 +43,46 @@ fi
 echo
 
 # -----------------------------------------------------------------------
-# function to install Stage 1 pipelines without requiring system R
+# function to install the MDI by a call to mdi::install() in system R
 # -----------------------------------------------------------------------
-function install_pipelines_no_R {
+function run_mdi_install {
+    ADD_TO_PATH="FALSE"
+    if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then ADD_TO_PATH="TRUE"; fi
+    CHECKOUT="NULL"
+    if [[ "$SUITE_NAME" != "" && "$SUITE_VERSION" != "" ]]; then
+        CHECKOUT="list(suites = list('$SUITE_NAME' = '$SUITE_VERSION'))"
+    fi
+
+    # note: we do not offer "config >> R_load_command" as it can make R version tracking ambiguous
+    # most users have R pre-installed, otherwise they must pre-execute a command to load it
+    # local batch scripts do allow users to specify an R load command in a wrapper of this script
+    R_COMMAND=`command -v Rscript`
+    if [ "$R_COMMAND" = "" ]; then
+        echo -e "\nFATAL: R program targets not found"
+        echo -e "please install or load R (or Singularity) as required on your system"
+        echo -e "e.g., module load R/0.0.0\n"
+        exit 1
+    fi
+    
+    # execute the three step R-based MDI install sequence: remotes, mdi-manager, mdi::install()
+    CRAN_REPO=https://repo.miserver.it.umich.edu/cran/
+    Rscript -e \
+"x <- 'remotes'; \
+if (!require(x, character.only = TRUE)){ \
+    Ncpus <- Sys.getenv('N_CPU'); \
+    if(Ncpus == '') Ncpus <- 1; \
+    message(paste('Ncpus =', Ncpus)); \
+    install.packages(x, repos = '$CRAN_REPO', Ncpus = Ncpus) \
+}"
+    Rscript -e "remotes::install_github('MiDataInt/mdi-manager')"
+    Rscript -e "mdi::install('$MDI_DIR', installPackages = $INSTALL_PACKAGES, \
+    confirm = FALSE, addToPATH = $ADD_TO_PATH, checkout=$CHECKOUT)" # permission was granted above
+}
+
+# -----------------------------------------------------------------------
+# functions to install Stage 1 pipelines only ...
+# -----------------------------------------------------------------------
+function install_pipelines_no_R { # ... without requiring system R; does not install forks
 
     # initialize the MDI directory tree
     echo "initializing the MDI file tree"
@@ -179,6 +216,14 @@ function install_pipelines_no_R {
     # remove tmp mdi-manager clone used for source files - the R mdi package is installed from GitHub
     rm -rf $MDI_MANAGER
 }
+function install_pipelines_only {
+    if [ "$INSTALL_MDI_FORKS" = "" ]; then
+        install_pipelines_no_R # allow end users to bypass R
+    else 
+        INSTALL_PACKAGES="FALSE" # but developers must have R to coordinate forks using mdi::install
+        run_mdi_install
+    fi
+}
 
 # -----------------------------------------------------------------------
 # function to check for valid singularity
@@ -204,7 +249,7 @@ function set_singularity_version {
 # install Stage 1 pipelines only; R is not required
 # -----------------------------------------------------------------------
 if [ "$ACTION_NUMBER" = "1" ]; then
-    install_pipelines_no_R
+    install_pipelines_only
     echo DONE
 
 # -----------------------------------------------------------------------
@@ -220,33 +265,8 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
 # this path forced by MDI_FORCE_SYSTEM_INSTALL during container build
 # -----------------------------------------------------------------------
     if [ "$SINGULARITY_VERSION" = "" ]; then 
-        CRAN_REPO=https://repo.miserver.it.umich.edu/cran/
-        ADD_TO_PATH="FALSE"
-        if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then ADD_TO_PATH="TRUE"; fi
-        CHECKOUT="NULL"
-        if [[ "$SUITE_NAME" != "" && "$SUITE_VERSION" != "" ]]; then
-            CHECKOUT="list(suites = list('$SUITE_NAME' = '$SUITE_VERSION'))"
-        fi
-        # note: we do not offer "config >> R_load_command" as it can make R version tracking ambiguous
-        # most users have R pre-installed, otherwise they must pre-execute a command to load it
-        # local batch scripts do allow users to specify an R load command in a wrapper of this script
-        R_COMMAND=`command -v Rscript`
-        if [ "$R_COMMAND" = "" ]; then
-            echo -e "\nFATAL: R program targets not found"
-            echo -e "please install or load R (or Singularity) as required on your system"
-            echo -e "e.g., module load R/0.0.0\n"
-            exit 1
-        fi
-        Rscript -e \
-"x <- 'remotes'; \
-if (!require(x, character.only = TRUE)){ \
-    Ncpus <- Sys.getenv('N_CPU'); \
-    if(Ncpus == '') Ncpus <- 1; \
-    message(paste('Ncpus =', Ncpus)); \
-    install.packages(x, repos = '$CRAN_REPO', Ncpus = Ncpus) \
-}"
-        Rscript -e "remotes::install_github('MiDataInt/mdi-manager')"  
-        Rscript -e "mdi::install('$MDI_DIR', confirm = FALSE, addToPATH = $ADD_TO_PATH, checkout=$CHECKOUT)" # permission was granted above
+        INSTALL_PACKAGES="TRUE"        
+        run_mdi_install
         echo DONE
 
 # -----------------------------------------------------------------------
@@ -268,7 +288,7 @@ if (!require(x, character.only = TRUE)){ \
         MDI_R_VERSION="v$MDI_R_VERSION"
 
         # install Stage 1
-        install_pipelines_no_R
+        install_pipelines_only
 
         # (re)pull the container base image
         BASE_NAME=mdi-singularity-base
