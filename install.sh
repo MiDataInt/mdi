@@ -277,7 +277,9 @@ if (!require(x, character.only = TRUE)){ \
         mkdir -p $IMAGE_DIR
         IMAGE_FILE=$IMAGE_DIR/$BASE_NAME-$MDI_R_VERSION.sif
         IMAGE_URI=oras://ghcr.io/MiDataInt/$BASE_NAME:$MDI_R_VERSION
-        singularity pull $IMAGE_FILE $IMAGE_URI
+        if [ ! -e $IMAGE_FILE ]; then
+            singularity pull $IMAGE_FILE $IMAGE_URI
+        fi 
         
         # run mdi::extend() within a base container instance with bind-mount to $MDI_DIR
         # R Shiny library comes from container, suite packages compiled by container into containers/library
