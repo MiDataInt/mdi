@@ -285,9 +285,8 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
             echo
             read -p "Please enter a major.minor R version (e.g., 4.1): " MDI_R_VERSION
         fi
-        if [ "$MDI_R_VERSION" != v* ]; then
-            MDI_R_VERSION="v$MDI_R_VERSION"
-        fi
+        HAS_V=`echo $MDI_R_VERSION | grep '^v'`
+        if [ "$HAS_V" = "" ]; then MDI_R_VERSION="v$MDI_R_VERSION"; fi
         
         # install Stage 1
         install_pipelines_only
