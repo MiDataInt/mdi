@@ -46,8 +46,6 @@ echo
 # function to install the MDI by a call to mdi::install() in system R
 # -----------------------------------------------------------------------
 function run_mdi_install {
-    ADD_TO_PATH="FALSE"
-    if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then ADD_TO_PATH="TRUE"; fi
     CHECKOUT="NULL"
     if [[ "$SUITE_NAME" != "" && "$SUITE_VERSION" != "" ]]; then
         CHECKOUT="list(suites = list('$SUITE_NAME' = '$SUITE_VERSION'))"
@@ -76,7 +74,7 @@ if (!require(x, character.only = TRUE)){ \
 }"
     Rscript -e "remotes::install_github('MiDataInt/mdi-manager')"
     Rscript -e "mdi::install('$MDI_DIR', installPackages = $INSTALL_PACKAGES, \
-    confirm = FALSE, addToPATH = $ADD_TO_PATH, checkout=$CHECKOUT)" # permission was granted above
+    confirm = FALSE, checkout=$CHECKOUT)" # permission was granted above
 }
 
 # -----------------------------------------------------------------------
@@ -158,30 +156,30 @@ function install_pipelines_no_R { # ... without requiring system R; does not ins
     cp -f $MDI_MANAGER/inst/mdi mdi   
     chmod ug+x mdi 
 
-    # add MDI_DIR to PATH via ~/.bashrc
-    # do not overwrite if already present or SUPPRESS_MDI_BASHRC is set
-    if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then
-        echo "checking for mdi directory in PATH"
-        head="# >>> mdi initialize >>>"
-        notice="# !! Contents within this block are managed by 'mdi initialize' !!"
-        path='export PATH='$MDI_DIR':$PATH'
-        tail="# <<< mdi initialize <<<"
-        payload="$head\n$notice\n$path\n$tail"
-        bashRcFile=~/.bashrc
-        bashRcBackup=$bashRcFile.mdi-backup
-        bashRcContents=""
-        match=""
-        if [ -e $bashRcFile ]; then 
-            cp $bashRcFile $bashRcBackup
-            bashRcContents=`sed 's/\r//g' $bashRcFile`
-            match=`grep "$head" $bashRcFile`
-        fi
-        if [ "$match" = "" ]; then
-            echo "adding mdi directory to PATH via ~/.bashrc"
-            bashRcContents="$bashRcContents\n\n$payload"
-            echo -e "$bashRcContents" | sed 's/\n\n\n/\n\n/g' > $bashRcFile
-        fi
-    fi
+    # # add MDI_DIR to PATH via ~/.bashrc
+    # # do not overwrite if already present or SUPPRESS_MDI_BASHRC is set
+    # if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then
+    #     echo "checking for mdi directory in PATH"
+    #     head="# >>> mdi initialize >>>"
+    #     notice="# !! Contents within this block are managed by 'mdi initialize' !!"
+    #     path='export PATH='$MDI_DIR':$PATH'
+    #     tail="# <<< mdi initialize <<<"
+    #     payload="$head\n$notice\n$path\n$tail"
+    #     bashRcFile=~/.bashrc
+    #     bashRcBackup=$bashRcFile.mdi-backup
+    #     bashRcContents=""
+    #     match=""
+    #     if [ -e $bashRcFile ]; then 
+    #         cp $bashRcFile $bashRcBackup
+    #         bashRcContents=`sed 's/\r//g' $bashRcFile`
+    #         match=`grep "$head" $bashRcFile`
+    #     fi
+    #     if [ "$match" = "" ]; then
+    #         echo "adding mdi directory to PATH via ~/.bashrc"
+    #         bashRcContents="$bashRcContents\n\n$payload"
+    #         echo -e "$bashRcContents" | sed 's/\n\n\n/\n\n/g' > $bashRcFile
+    #     fi
+    # fi
 
     # clone/pull the definitive framework repositories
     echo "cloning/updating the mdi framework repositories"
