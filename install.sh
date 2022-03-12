@@ -156,31 +156,6 @@ function install_pipelines_no_R { # ... without requiring system R; does not ins
     cp -f $MDI_MANAGER/inst/mdi mdi   
     chmod ug+x mdi 
 
-    # # add MDI_DIR to PATH via ~/.bashrc
-    # # do not overwrite if already present or SUPPRESS_MDI_BASHRC is set
-    # if [ "$SUPPRESS_MDI_BASHRC" = "" ]; then
-    #     echo "checking for mdi directory in PATH"
-    #     head="# >>> mdi initialize >>>"
-    #     notice="# !! Contents within this block are managed by 'mdi initialize' !!"
-    #     path='export PATH='$MDI_DIR':$PATH'
-    #     tail="# <<< mdi initialize <<<"
-    #     payload="$head\n$notice\n$path\n$tail"
-    #     bashRcFile=~/.bashrc
-    #     bashRcBackup=$bashRcFile.mdi-backup
-    #     bashRcContents=""
-    #     match=""
-    #     if [ -e $bashRcFile ]; then 
-    #         cp $bashRcFile $bashRcBackup
-    #         bashRcContents=`sed 's/\r//g' $bashRcFile`
-    #         match=`grep "$head" $bashRcFile`
-    #     fi
-    #     if [ "$match" = "" ]; then
-    #         echo "adding mdi directory to PATH via ~/.bashrc"
-    #         bashRcContents="$bashRcContents\n\n$payload"
-    #         echo -e "$bashRcContents" | sed 's/\n\n\n/\n\n/g' > $bashRcFile
-    #     fi
-    # fi
-
     # clone/pull the definitive framework repositories
     echo "cloning/updating the mdi framework repositories"
     PIPELINES_FRAMEWORK=mdi-pipelines-framework
@@ -204,6 +179,26 @@ function install_pipelines_no_R { # ... without requiring system R; does not ins
             REPO_VERSION=$SUITE_VERSION
         fi
         updateRepo $SUITES_DIR $GIT_REPO $REPO_VERSION
+    done
+
+    # clone/pull any additional tool suite dependencies from suite _config.yml files
+    DEPENDENCIES=`
+        cat $SUITES_DIR/*/_config.yml 2>/dev/null | 
+        perl -e '
+            my $inDep = 0;
+            my %suites = map {$_ => 1} split(/\s+/, "'$SUITES'");
+            while(<>){
+                if($_ =~ m/^suite_dependencies/){ $inDep = 1 } 
+                elsif($_ =~ m/^\S/){ $inDep = 0 }
+                elsif($inDep and $_ =~ m|^\s+-\s+(\S+)|){
+                    $suites{$1} or print $1, "\n";
+            }
+        }' | 
+        sort | 
+        uniq
+    `
+    for GIT_REPO in $DEPENDENCIES; do 
+        updateRepo $SUITES_DIR $GIT_REPO latest
     done
 
     # initialize the pipelines jobManager

@@ -48,8 +48,6 @@ either install the MDI using the R 'mdi-manager' package, or download a customiz
 - MDI manager: <https://github.com/MiDataInt/mdi-manager.git>
 - batch script generator: <https://wilsonte-umich.shinyapps.io/mdi-script-generator>
 
-
-
 ## Install the MDI framework(s)
 
 To clone this repository and run the MDI installation script, execute
@@ -69,6 +67,17 @@ If you will use containers but need to provide an atypical
 command to load Singularity, please initially select installation 
 level 1 (pipelines only), then edit file 'config/singularity.yml'
 and re-run the installer. 
+
+## OPTIONAL: Create an alias to the 'mdi' utility
+
+The following commands will create an alias to the main 'mdi' utility
+in your new MDI installation for easy access.
+
+```bash
+# from within the mdi directory
+./mdi alias --alias mdi # change the alias name if you'd like
+`./mdi alias --alias mdi --get` # activate the alias in the current shell too
+```
 
 ## Configure and install tool suites
 
