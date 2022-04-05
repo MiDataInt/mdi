@@ -35,7 +35,7 @@ if [ "$ACTION_NUMBER" = "" ]; then
     echo "What would you like to install?"
     echo
     echo "  1 - MDI Stage 1 pipelines only; Stage2 apps will be skipped"
-    echo "  2 - both Stage 1 pipelines and Stage 2 apps (requires R or Singularity)"
+    echo "  2 - both Stage 1 pipelines and Stage 2 apps (requires R)"
     echo "  3 - exit and do nothing"
     echo
     read -p "Select an action by its number: " ACTION_NUMBER
@@ -57,8 +57,8 @@ function run_mdi_install {
     R_COMMAND=`command -v Rscript`
     if [ "$R_COMMAND" = "" ]; then
         echo -e "\nFATAL: R program targets not found"
-        echo -e "please install or load R (or Singularity) as required on your system"
-        echo -e "e.g., module load R/0.0.0\n"
+        echo -e "please install or load R as required on your system"
+        echo -e "    e.g., module load R/0.0.0\n"
         exit 1
     fi
     
@@ -220,22 +220,24 @@ function install_pipelines_only {
 
 # -----------------------------------------------------------------------
 # function to check for valid singularity
+#   NOTE 2022-04-05: disabled mdi-singularity-base due to stddef.h out-of-date issues
 # -----------------------------------------------------------------------
 function set_singularity_version_ {
     export SINGULARITY_VERSION=`singularity --version 2>/dev/null | grep -P '^singularity.+version.+'`
 }
 function set_singularity_version {
-    set_singularity_version_ # use system singularity if present
-    if [ "$SINGULARITY_VERSION" = "" ]; then # otherwise attempt to load it
-        CONFIG_FILE=$MDI_DIR/config/singularity.yml
-        if [ -f $CONFIG_FILE ]; then
-            LOAD_COMMAND=`grep -P '^load-command:\s+' $CONFIG_FILE | sed -e 's/\"//g' -e 's/load-command:\s*//' | grep -v null | grep -v '~'`
-            if [ "$LOAD_COMMAND" != "" ]; then
-                $LOAD_COMMAND > /dev/null 2>&1
-                set_singularity_version_
-            fi
-        fi
-    fi 
+    : # do nothing
+    # set_singularity_version_ # use system singularity if present
+    # if [ "$SINGULARITY_VERSION" = "" ]; then # otherwise attempt to load it
+    #     CONFIG_FILE=$MDI_DIR/config/singularity.yml
+    #     if [ -f $CONFIG_FILE ]; then
+    #         LOAD_COMMAND=`grep -P '^load-command:\s+' $CONFIG_FILE | sed -e 's/\"//g' -e 's/load-command:\s*//' | grep -v null | grep -v '~'`
+    #         if [ "$LOAD_COMMAND" != "" ]; then
+    #             $LOAD_COMMAND > /dev/null 2>&1
+    #             set_singularity_version_
+    #         fi
+    #     fi
+    # fi 
 }
 
 # -----------------------------------------------------------------------
@@ -256,6 +258,7 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
 # -----------------------------------------------------------------------
 # Singularity not found: use full system-R mdi::install() from mdi-manager package
 # this path forced by MDI_FORCE_SYSTEM_INSTALL during container build
+#   NOTE 2022-04-05: this path now forced for all Stage 2 installations
 # -----------------------------------------------------------------------
     if [ "$SINGULARITY_VERSION" = "" ]; then 
         INSTALL_PACKAGES="TRUE"        
@@ -264,40 +267,43 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
 
 # -----------------------------------------------------------------------
 # Singularity found: use mdi-singularity-base to install only missing packages
+#   NOTE 2022-04-05: disabled mdi-singularity-base due to stddef.h out-of-date issues
 # -----------------------------------------------------------------------
     else 
+        echo "ERROR: support for mdi-singularity-base has been disabled"
+        exit 1
 
-        # query for the required R version if not provided in environment
-        if [ "$MDI_R_VERSION" = "" ]; then
-            echo
-            echo "Singularity is available on system and will be used to speed"
-            echo "installation of Stage 2 apps."
-            echo
-            echo "The installer needs to know which R-versioned container to download."
-            echo "https://github.com/MiDataInt/mdi-singularity-base/pkgs/container/mdi-singularity-base"
-            echo
-            read -p "Please enter a major.minor R version (e.g., 4.1): " MDI_R_VERSION
-        fi
-        HAS_V=`echo $MDI_R_VERSION | grep '^v'`
-        if [ "$HAS_V" = "" ]; then MDI_R_VERSION="v$MDI_R_VERSION"; fi
+    #     # query for the required R version if not provided in environment
+    #     if [ "$MDI_R_VERSION" = "" ]; then
+    #         echo
+    #         echo "Singularity is available on system and will be used to speed"
+    #         echo "installation of Stage 2 apps."
+    #         echo
+    #         echo "The installer needs to know which R-versioned container to download."
+    #         echo "https://github.com/MiDataInt/mdi-singularity-base/pkgs/container/mdi-singularity-base"
+    #         echo
+    #         read -p "Please enter a major.minor R version (e.g., 4.1): " MDI_R_VERSION
+    #     fi
+    #     HAS_V=`echo $MDI_R_VERSION | grep '^v'`
+    #     if [ "$HAS_V" = "" ]; then MDI_R_VERSION="v$MDI_R_VERSION"; fi
         
-        # install Stage 1
-        install_pipelines_only
+    #     # install Stage 1
+    #     install_pipelines_only
 
-        # (re)pull the container base image
-        BASE_NAME=mdi-singularity-base
-        CONTAINERS_DIR=$MDI_DIR/containers
-        IMAGE_DIR=$CONTAINERS_DIR/$BASE_NAME
-        mkdir -p $IMAGE_DIR
-        IMAGE_FILE=$IMAGE_DIR/$BASE_NAME-$MDI_R_VERSION.sif
-        IMAGE_URI=oras://ghcr.io/MiDataInt/$BASE_NAME:$MDI_R_VERSION
-        if [ ! -e $IMAGE_FILE ]; then
-            singularity pull $IMAGE_FILE $IMAGE_URI
-        fi 
+    #     # (re)pull the container base image
+    #     BASE_NAME=mdi-singularity-base
+    #     CONTAINERS_DIR=$MDI_DIR/containers
+    #     IMAGE_DIR=$CONTAINERS_DIR/$BASE_NAME
+    #     mkdir -p $IMAGE_DIR
+    #     IMAGE_FILE=$IMAGE_DIR/$BASE_NAME-$MDI_R_VERSION.sif
+    #     IMAGE_URI=oras://ghcr.io/MiDataInt/$BASE_NAME:$MDI_R_VERSION
+    #     if [ ! -e $IMAGE_FILE ]; then
+    #         singularity pull $IMAGE_FILE $IMAGE_URI
+    #     fi 
         
-        # run mdi::extend() within a base container instance with bind-mount to $MDI_DIR
-        # R Shiny library comes from container, suite packages compiled by container into containers/library
-        singularity run --bind $MDI_DIR:/srv/active/mdi $IMAGE_FILE extend
-        echo DONE
+    #     # run mdi::extend() within a base container instance with bind-mount to $MDI_DIR
+    #     # R Shiny library comes from container, suite packages compiled by container into containers/library
+    #     singularity run --bind $MDI_DIR:/srv/active/mdi $IMAGE_FILE extend
+    #     echo DONE
     fi
 fi
