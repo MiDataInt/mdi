@@ -166,7 +166,7 @@ function install_pipelines_no_R { # ... without requiring system R; does not ins
 
     # clone/pull any tool suites from config.yml
     echo "cloning/updating requested tool suites"
-    SUITES=`
+    export SUITES=`
         grep -v "^\s*#" config/suites.yml | 
         grep -v "^---" | 
         sed -e 's/^\s*-\s*//' -e 's/suites:\s*//' -e 's/#.*//' -e "s/^https:\/\/github.com\///" -e "s/\.git$//" | 
@@ -182,18 +182,20 @@ function install_pipelines_no_R { # ... without requiring system R; does not ins
     done
 
     # clone/pull any additional tool suite dependencies from suite _config.yml files
+    echo "cloning/updating tool suite dependencies"
     DEPENDENCIES=`
         cat $SUITES_DIR/*/_config.yml 2>/dev/null | 
         perl -e '
             my $inDep = 0;
-            my %suites = map {$_ => 1} split(/\s+/, "'$SUITES'");
+            my %suites = map {$_ => 1} split(/\s+/, $ENV{SUITES});
             while(<>){
                 if($_ =~ m/^suite_dependencies/){ $inDep = 1 } 
                 elsif($_ =~ m/^\S/){ $inDep = 0 }
                 elsif($inDep and $_ =~ m|^\s+-\s+(\S+)|){
                     $suites{$1} or print $1, "\n";
+                }
             }
-        }' | 
+        ' | 
         sort | 
         uniq
     `
