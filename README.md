@@ -1,19 +1,19 @@
 # Michigan Data Interface
 
 The [Michigan Data Interface](https://midataint.github.io/) (MDI) 
-is a framework for developing, installing and running a variety of 
-HPC data analysis pipelines and interactive R Shiny data visualization 
-applications within a standardized design and implementation interface.
+is a framework for developing, installing and running 
+HPC data analysis pipelines and interactive visualization 
+applications within a standardized design interface.
 
-Data analysis in the MDI is separated into 
+The MDI is separated into 
 [two stages of code execution](https://midataint.github.io/docs/analysis-flow/) 
 called Stage 1 HPC **pipelines** and Stage 2 web applications (i.e., **apps**).
-Collectively, pipelines and apps are referred to as **tools**.
+Collectively, pipelines and apps are known as **tools**.
 
 ## Repository contents
 
-This repository carries a single **installation script** that will 
-set up the MDI on your computer with all required components and a proper
+This repository carries an **installation script** that will 
+set up the MDI on your Linux server with all required components and a proper
 folder structure to support all tools.
 
 ## System requirements
@@ -24,26 +24,24 @@ The MDI offers two installation levels, with differing system requirements.
 
 Some users might only run Stage 1 pipelines on an HPC server.
 This installation level skips Stage 2 apps 
-and directly clones the required MDI repositories. Accordingly, Git must 
-be installed on the host machine.
+and directly clones the required MDI repositories. 
+Accordingly, Git must be installed.
 
 - Git: <https://git-scm.com/>
 
-### Stage 2 Pipelines plus Stage 2 Apps - additional R / Singularity dependency
+### Stage 2 Pipelines plus Stage 2 Apps - additional R dependency
 
-Stage 2 web apps are R Shiny programs. R might run on the host machine
-directly, or within a Singularity container. Therefore, either R or
-Singularity (but not both) must be installed.
+Stage 2 web apps are R Shiny programs. Therefore, R must be installed.
 Git is still required to download this installer repository.
 
 - R: <https://www.r-project.org/>
-- Singularity: <https://sylabs.io/>
 
 ### Running Stage 2 Apps on your desktop or laptop
 
 The Stage 2 web server runs perfectly well on Windows or Mac computers,
 but this installation script will not be useful. Instead,
-either install the MDI using the R 'mdi-manager' package, or download a customized batch script to install and run the server:
+either install the MDI using the R 'mdi-manager' package, or 
+download a batch script customized for your computer:
 
 - MDI manager: <https://github.com/MiDataInt/mdi-manager.git>
 - batch script generator: <https://wilsonte-umich.shinyapps.io/mdi-script-generator>
@@ -60,13 +58,8 @@ cd mdi
 ```
 
 Please read the menu options and confirm your installation choice.
-A full installation, including Stage 2 apps, can take many minutes 
-to complete if not using containers.
-
-If you will use containers but need to provide an atypical
-command to load Singularity, please initially select installation 
-level 1 (pipelines only), then edit file 'config/singularity.yml'
-and re-run the installer. 
+A full installation including Stage 2 apps can take many minutes 
+to complete.
 
 ## OPTIONAL: Create an alias to the 'mdi' utility
 
@@ -76,8 +69,10 @@ in your new MDI installation for easy access.
 ```bash
 # from within the mdi directory
 ./mdi alias --alias mdi # change the alias name if you'd like
-`./mdi alias --alias mdi --get` # activate the alias in the current shell too
+`./mdi alias --alias mdi --get` # activate the alias in the current shell (or log back in)
 ```
+
+You could also edit your shell files to modify the PATH variable.
 
 ## Configure and install tool suites
 
@@ -89,8 +84,8 @@ tools. To install tools from any provider, first edit file
 ```yml
 # mdi/config/suites.yml
 suites:
-    - https://github.com/GIT_USER/SUITE_NAME-mdi-tools.git
     - GIT_USER/SUITE_NAME-mdi-tools # either format works
+    - https://github.com/GIT_USER/SUITE_NAME-mdi-tools.git
 ```
 
 Then call <code>install.sh</code> again to clone the listed
@@ -102,8 +97,8 @@ the Stage 2 web server, or run the following from the command line:
 
 ```bash
 mdi add --help
-mdi add -s https://github.com/GIT_USER/SUITE_NAME-mdi-tools.git
 mdi add -s GIT_USER/SUITE_NAME-mdi-tools # either format works
+mdi add -s https://github.com/GIT_USER/SUITE_NAME-mdi-tools.git
 ```
 
 ## Run a Stage 1 pipeline from the command line
@@ -114,16 +109,17 @@ any pipeline. For help from the command line, simply call
 the utility with no arguments:
 
 ```bash
-mdi
+./mdi
+mdi # if you created an alias above
 ```
 
 ## Run the MDI web server
 
-Run the Stage 2 apps web server as follows - in a few seconds a web browser will open and you will be ready to load your data and run an associated app.
+Run the Stage 2 apps web server as follows.
 
 ```bash
-mdi run --help
-mdi run
+mdi server --help
+mdi server
 ```
 
 ## Install and use repository developer forks
@@ -140,7 +136,7 @@ module load R/4.1.0
 Next, provide a 
 [GithHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 by setting environment variable GITHUB_PAT or 
-creating file '~/gitCredentials.R' or'mdi/gitCredentials.R':
+creating file '~/gitCredentials.R' or 'mdi/gitCredentials.R':
 
 ```r
 # ~/gitCredentials.R
@@ -157,11 +153,12 @@ the installation as follows, which calls the <code>mdi::install()</code>
 R function capable of installing forked repos.
 
 ```bash
+./mdi install --help
 ./mdi install --forks # Stage 1 pipelines only
 ./mdi install --forks --install-packages # Stage 1 and Stage 2
 ```
 
-Finally, add the 'develop' flag to your 'mdi' calls, which will
+Finally, add the '--develop/-d' flag to your 'mdi' calls, which will
 use any forked repositories from your GitHub account, or, if you have no forks,
 the tip of the main branch of the definitive repository (instead of a versioned release commit).
 
@@ -169,5 +166,3 @@ the tip of the main branch of the definitive repository (instead of a versioned 
 mdi -d ...
 mdi --develop ...
 ```
-
-
