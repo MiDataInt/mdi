@@ -68,10 +68,10 @@ leading to data.yml files with entries like:
 # data.yml
 align: # the pipeline action
     fastq-input: # the option family
-        input-dir: /some/path # a single option value
+        input-dir: /data/path # a single option value
 ```
 
-### Standard action options
+### Standard options
 
 Other options are either mandated or offered by the MDI pipelines framework
 and automatically added to all pipeline actions. They are too numerous to 
@@ -80,7 +80,7 @@ repeat here (see above), but two are critically important as they are how all MD
 - **output-dir** = the destination directory for an analysis project
 - **data-name** = the sub-folder in --output-dir for each sample analyzed
 
-Thus, the following job configuration file:
+Thus, the following job configuration file snippet:
 
 ```yml
 # data.yml

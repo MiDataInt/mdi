@@ -8,7 +8,7 @@ nav_order: 10
 
 Follow these instructions to create an "MDI-centric"
 (as opposed to "suite centric") MDI installation, complete 
-with managers, frameworks and tool suites.
+with managers, frameworks, and tool suites.
 
 ### Clone the MDI repo
 

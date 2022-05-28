@@ -8,7 +8,7 @@ nav_order: 10
 ## {{ page.title }}
 
 Here is the rest of the inline help from the 'mdi' command - as you can see, 
-mdi subcommands apply to various activities of interest to you:
+mdi subcommands apply to various activities of interest:
 
 ```bash
 $ mdi
@@ -52,7 +52,7 @@ available commands:
 
 Once it is installed the first time, the mdi utility has functions - 
 like **install**, **add**, **list**, and **build** - 
-to help update and maintain the installation, see the available pipelines,
+to help update and maintain the installation, see available pipelines,
 build Singularity containers (for developers), and more.
 
 ### Pipeline execution and monitoring

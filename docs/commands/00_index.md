@@ -42,9 +42,9 @@ denoted as "\<command\>" above.
 
 ### Job configuration files
 
-Many commands act on Stage 1 Pipeline job configurations - 
+Many commands act on Stage 1 Pipeline job configurations, i.e.,  
 YAML-format files that specify the work to be done. We refer to this 
-as "\<data.yml\>" in the generic form - your file would have its own name
+as "\<data.yml\>" above - your file would have its own name.
 
 ### Pipeline targets
 

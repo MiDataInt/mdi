@@ -11,7 +11,7 @@ Stage 1 Pipelines each have a set of
 **actions** - the staged units of work they are intended to accomplish,
 encoded in the pipeline's scripts - 
 and **subcommands** - pipeline-level management actions handled by the 
-MDI pipeline framework. 
+MDI pipelines framework. 
 
 For example, here is the inline help for the 'svCapture' pipeline.
 
@@ -68,7 +68,8 @@ for a pipeline for you to modify.
 ### Job runtime environments
 
 The MDI places a premium on consistent, controlled execution environments
-by using [conda](https://docs.conda.io/en/latest/). 
+by using [conda](https://docs.conda.io/en/latest/). It goes like this.
+
 Developers list the software their pipeline needs in their configuration files. 
 
 End users make calls to the **conda** subcommand to build a
@@ -82,7 +83,7 @@ for end users to download. Users must have Singularity available on their
 server capable of running (but not building) environments.
 
 Because most shared HPC servers do not support Singularity builds, 
-the MDI provides resources that make it easy to build containers
-on Amazon Web Services:
+the MDI provides resources that make it easy for developers 
+to build containers on Amazon Web Services:
 
 - <https://github.com/MiDataInt/mdi-container-builder>
