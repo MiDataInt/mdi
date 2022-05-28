@@ -96,3 +96,8 @@ would write output for two analyzed samples to folders:
 
 - /project/path/sample_1
 - /project/path/sample_2
+
+Among other useful common options, '--dry-run' allows a 
+test of the action and options configuration prior to actual execution.
+Every pipeline can also use parallel processing via options '--n-cpu' and 
+'--ram-per-cpu', if supported by the pipeline developer.
