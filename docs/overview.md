@@ -16,7 +16,7 @@ Most commonly, the command line utility described here is only
 used directly on a Linux server that will run Stage 1 Pipelines.
 The following are some of the other ways MDI tools are used:
 
-- MDI R package: <https://github.com/MiDataInt/mdi-manager.git>
+- MDI R package: <https://github.com/MiDataInt/mdi-manager>
 - MDI batch scripts: <https://wilsonte-umich.shinyapps.io/mdi-script-generator>
 - MDI public web servers: <https://github.com/MiDataInt/mdi-web-server>
 

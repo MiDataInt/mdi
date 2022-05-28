@@ -1,11 +1,14 @@
 ---
-title: install
-parent: Command_Structure
+title: "Top Level Commands"
+parent: "Command Structure"
 has_children: false
 nav_order: 10
 ---
 
-Here is the rest of the inline help from the 'mdi' command - as you can see, the mdi subcommands apply to various activities that will be of interest to you:
+## {{ page.title }}
+
+Here is the rest of the inline help from the 'mdi' command - as you can see, 
+mdi subcommands apply to various activities of interest to you:
 
 ```bash
 $ mdi
@@ -45,15 +48,16 @@ available commands:
     server      launch the web server to use interactive Stage 2 apps
 ```
 
+### Installation (server) management
 
-## Installation (server) management
+Once it is installed the first time, the mdi utility has functions - 
+like **install**, **add**, **list**, and **build** - 
+to help update and maintain the installation, see the available pipelines,
+build Singularity containers (for developers), and more.
 
-Once it is installed the first time, the mdi utility has functions
-to help update and maintain the installation.
+### Pipeline execution and monitoring
 
-## Pipeline execution and monitoring
-
-It is possible to use the mdi utility to execute installed pipelines 
+You can use the mdi utility to execute installed pipelines 
 synchronously in the command shell, e.g.:
 
 ```bash
@@ -62,8 +66,8 @@ mdi myPipeline do myData.yml --my-option 22
 <executes 'myPipeline do' on myData.yml, overriding option '--my-option'>
 ```
 
-However, the nature of HPC pipelines means you will probably
-want to use the utility to submit work to your cluster server's job scheduler, e.g.:
+However, more likely you will want to submit work
+to your cluster server's job scheduler, e.g.:
 
 ```bash
 mdi submit myData.yml --my-option 22
@@ -71,7 +75,20 @@ mdi submit myData.yml --my-option 22
 <similar to above, but defers execution to a server node>
 ```
 
-## Help on subcommands
+Thus, a typical subcommand sequence to execute and monitor work might be:
+
+- **mkdir** = create the output directory
+- **submit --dry-run** = check the submission config
+- **submit** = queue the work request
+- **status** = monitor the job's progress
+- **top** = watch the processes doing your work on the server node
+- **report** = view each task's output log
+- **ls** = see the files the job generated
+
+Other subcommands - like **delete**, **rollback**, and **purge** - 
+are for error handling and recovery.
+
+### Help on subcommands
 
 Subcommands offer their own inline help when called with no options. 
 We won't repeat them all, but as one example:

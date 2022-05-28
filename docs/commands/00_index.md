@@ -1,10 +1,15 @@
 ---
-title: "Command_Structure"
+title: "Command Structure"
 has_children: true
 nav_order: 20
 ---
 
-The mdi command line utility provides inline help when called without any subcommands or options.
+## One utility, multiple actions
+
+Similar to other common utilities (git, docker, etc.), the MDI
+utility takes various input formats to execute many tasks in different ways. 
+
+Call the utility without any subcommands or options to see the basic structures.
 
 ```bash
 $ mdi
@@ -29,13 +34,6 @@ usage:
 
 <output truncated>
 ```
-
-## One utility, multiple actions
-
-Similar to other common utilities (git, docker, etc.), the MDI
-utility takes various input formats to execute many tasks in different ways. 
-Other pages will summarize them, for now please review the output above and
-the following additional guidance.
 
 ### Subcommands
 
