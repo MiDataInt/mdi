@@ -8,9 +8,10 @@ nav_order: 40
 
 At the heart of most pipeline executions is a job configuration file,
 i.e., a 'data.yml' file.  This versatile YAML-format tool makes it easy
-to construct and execute complex pipeline action sequences.
+to construct complex work sequences, including parallel array jobs and 
+serial actions.
 
-Advantages of job configuration files are that you have better control
+Other advantages of job configuration files are that you have better control
 over many options and have a ready means of tracking your work,
 including by examining associated job output logs.
 
@@ -42,18 +43,18 @@ variables:
     VAR_NAME: value
 shared:
     optionFamily_1:
-        optionName_1: 99 # a single keyed option value
+        option_1: 99 # a single keyed option value
 pipelineAction:
     optionFamily_1:
-        optionName_1: ${VAR_NAME} # a value from a variable
+        option_1: ${VAR_NAME} # a value from a variable
 anotherAction:
     optionFamily_2:
-        optionName_2:
+        option_2:
             - valueA # an array of option values, executed in parallel
             - valueB      
 execute:
-    - pipelineAction # pipelineAction overrides shared optionName_1
-    - anotherAction  # has access to optionName_1 and optionName_2
+    - pipelineAction # pipelineAction overrides shared option_1
+    - anotherAction  # anotherAction has access to option_1 and option_2
 ```
 
 ### Pipeline target declaration
@@ -70,8 +71,8 @@ be either:
 
 ### Config file variables
 
-The 'variables' section acts like an initial code block by
-allowing you to assign values to variables that can be recalled further down
+The 'variables' section
+allows you to assign values to variables that can be recalled further down
 in standard shell syntax. The reason to use variables is to prevent
 typing the same thing over and over!
 
@@ -80,12 +81,12 @@ typing the same thing over and over!
 Another means of streamlining config files exploits the facts that different
 actions in a pipeline often use common options.  By specifying them in the
 'shared' section, you only have to enter them once. Any values listed
-under the action itself will take precedence.
+under an action key will take precedence.
 
 ### Environment config files
 
-As a further convenience when you get tired of have many files
-with the same option values (e.g., a shared data directory), you may
+As a further convenience, when you get tired of having many files
+with the same option values (e.g., a shared data directory) you may
 also create a file called 'pipeline.yml' or '\<pipelineName\>.yml'
 in the same directory as '\<data\>.yml'. 
 
@@ -95,10 +96,75 @@ from any values you specify on the command line, with the last
 value that is read taking precedence, i.e., options specified on the 
 command line have the highest precedence.
 
+### Option recycling - parallel array jobs
+
+A key feature of option values in job files is that they "recycle" as in
+vectorized programming.  If all options have a single value,
+a single job will result. However, if one or more options have multiple
+assigned values, all single-value options are reused along with
+each of the list option values. 
+
+Thus, the following example:
+
+```yml
+actionName:
+    optionFamily:
+        option_1: AAA
+        option_2: 1 2 # whitespace-separated values are interpreted as lists ...
+        option_3: 
+            - 3 # ... as is the standard YAML list syntax
+            - 4
+```  
+
+would result in an array job with two tasks, as follows:
+
+| Array Task # | option_1 | option_2 | option_3 |
+| ------------ | -------- | -------- | -------- |
+| 1            | AAA      | 1        | 3        |
+| 2            | AAA      | 2        | 4        |
+
+
+
+Importantly, if one option has multiple values, every other option must either
+have the same number of values or a single value. You will get an error message
+if you have option lists of different lengths.
+
 ### Options repeated in log files
 
 When you examine job log files with 'mdi report' you will find that
 all job options are repeated back to you in YAML format, for an
 unambiguous, permanent record of what was done. You can turn this feature
 off with option '--quiet'.
+
+### Multi-pipeline job files
+
+When you are ready to increase the complexity of your job sequences still
+further, config files support the use of YAML blocks to make sequential
+calls to multiple pipelines in the same data.yml file. 
+
+```yml
+# data.yml
+---
+variables: # declarations here are available to both pipelines below
+shared:
+--- # '---' is the text sequence that starts a new YAML block
+pipeline: pipeline_1
+actionX:
+execute:
+    - actionX
+---
+pipeline: pipeline_2
+actionY:
+execute:
+    - actionY
+```
+
+The net effect is like executing the same mdi subcommand on two
+different data.yml files, except that now the declarations in 
+'variables' and 'shared' are available to both pipelines.
+
+Using this approach, you can can perform initial processing
+tasks with a first pipeline and continue with further processing
+with a second (or third...) pipeline, all with the convenience 
+of shared variables and single mdi commands.
 
