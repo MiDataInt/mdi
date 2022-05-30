@@ -80,7 +80,7 @@ Alternatively, developers make calls to the **build** subcommand to create
 and upload pre-assembled Singularity containers carrying the required 
 environment(s) and mark their pipelines as supporting containers 
 for end users to download. Users must have Singularity available on their
-server capable of running (but not building) environments.
+server capable of running (but not building) containers.
 
 Because most shared HPC servers do not support Singularity builds, 
 the MDI provides resources that make it easy for developers 
