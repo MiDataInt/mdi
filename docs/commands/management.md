@@ -18,6 +18,7 @@ $ mdi
 available commands:
 
   job submission:
+    inspect     print the parsed values of all job options to STDOUT in YAML format
     mkdir       create the output directory(s) needed by a job configuration file
     submit      queue all required data analysis jobs on the HPC server
     extend      queue only new or deleted/unsatisfied jobs
@@ -77,10 +78,11 @@ mdi submit myData.yml --my-option 22
 
 Thus, a typical subcommand sequence to execute and monitor work might be:
 
+- **inspect** = show the parsed options for a job file
 - **mkdir** = create the output directory
 - **submit --dry-run** = check the submission config
 - **submit** = queue the work request
-- **status** = monitor the job's progress
+- **status** = monitor the jobs' progress
 - **top** = watch the processes doing your work on the server node
 - **report** = view each task's output log
 - **ls** = see the files the job generated
