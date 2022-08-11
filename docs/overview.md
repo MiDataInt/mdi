@@ -16,7 +16,7 @@ The command line utility is only
 used on a Linux server that will run Stage 1 Pipelines.
 Here are some of the other ways MDI tools are accessed:
 
-- MDI Desktop: <https://midataint.github.io/mdi-desktop-app>
+- MDI Desktop (recommended): <https://midataint.github.io/mdi-desktop-app>
 - MDI R package: <https://midataint.github.io/mdi-manager>
 - MDI public web servers: <https://github.com/MiDataInt/mdi-web-server>
 
