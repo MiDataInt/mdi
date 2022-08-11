@@ -6,13 +6,13 @@ nav_order: 40
 
 ## {{ page.title }}
 
-At the heart of most pipeline executions is a job configuration file,
-i.e., a 'data.yml' file.  This versatile YAML-format tool makes it easy
+MDI pipeline executions are controlled by a job configuration file,
+i.e., a 'data.yml' file.  This versatile YAML-format script makes it easy
 to construct complex work sequences, including parallel array jobs and 
 serial actions.
 
 Other advantages of job configuration files are that you have better control
-over many options and have a ready means of tracking your work,
+over many options and a ready means of tracking your work,
 including by examining associated job output logs.
 
 ### YAML format
@@ -24,7 +24,7 @@ or just proceed, it is intuitive and easy.
 
 ### Config file templates
 
-To get a template to help you write your config file use:
+To get a template to help you quickly write a new job configuration:
 
 ```bash
 mdi <pipelineName> template --help
@@ -78,15 +78,15 @@ typing the same thing over and over!
 
 ### Option sharing between actions
 
-Another means of streamlining config files exploits the facts that different
-actions in a pipeline often use common options.  By specifying them in the
+Another means of streamlining config files exploits the fact that different
+actions in a pipeline often use the same options.  By specifying them in the
 'shared' section, you only have to enter them once. Any values listed
 under an action key will take precedence.
 
 ### Environment config files
 
 As a further convenience, when you get tired of having many files
-with the same option values (e.g., a shared data directory) you may
+with the same option values (e.g., a shared directory) you may
 also create a file called 'pipeline.yml' or '\<pipelineName\>.yml'
 in the same directory as '\<data\>.yml'. 
 
@@ -166,5 +166,5 @@ different data.yml files, except that now the declarations in
 Using this approach, you can can perform initial processing
 tasks with a first pipeline and continue with further processing
 with a second (or third...) pipeline, all with the convenience 
-of shared variables and single mdi commands.
+of shared variables and mdi commands.
 

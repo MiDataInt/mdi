@@ -7,7 +7,7 @@ nav_order: 20
 ## One utility, multiple actions
 
 Similar to other common utilities (git, docker, etc.), the MDI
-utility takes various input formats to execute many tasks in different ways. 
+utility has various argument formats to execute many needed tasks. 
 
 Call the utility without any subcommands or options to see the basic structures.
 
@@ -38,17 +38,17 @@ usage:
 ### Subcommands
 
 The 'mdi' command often calls a nested program or subcommand, 
-denoted as "\<command\>" above.
+denoted as `<command>` above.
 
 ### Job configuration files
 
-Many commands act on Stage 1 Pipeline job configurations, i.e., 
+Many commands act on Stage 1 Pipeline job configurations, 
 YAML-format files that specify the work to be done. We refer to this 
-as "\<data.yml\>" above - your file would have its own name.
+as `<data.yml>` above - your file would have its own name.
 
 ### Pipeline targets
 
-Many commands execute a specific Stage 1 Pipeline, denoted as "\<pipeline\>" above.
+Many commands execute a specific Stage 1 Pipeline, denoted as `<pipeline>` above.
 Other times, the pipeline is specified in the job configuration file.
 
 ### Option levels

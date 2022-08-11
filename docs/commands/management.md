@@ -7,7 +7,7 @@ nav_order: 10
 
 ## {{ page.title }}
 
-Here is the rest of the inline help from the 'mdi' command - as you can see, 
+Here is the rest of the inline help from the `mdi` command - as you can see, 
 mdi subcommands apply to various activities of interest:
 
 ```bash
@@ -62,18 +62,16 @@ You can use the mdi utility to execute installed pipelines
 synchronously in the command shell, e.g.:
 
 ```bash
+#execute 'myPipeline do' on myData.yml, overriding option '--my-option'
 mdi myPipeline do myData.yml --my-option 22
-
-<executes 'myPipeline do' on myData.yml, overriding option '--my-option'>
 ```
 
 However, more likely you will want to submit work
 to your cluster server's job scheduler, e.g.:
 
 ```bash
+# similar to above, but defers execution to a cluster node
 mdi submit myData.yml --my-option 22
-
-<similar to above, but defers execution to a server node>
 ```
 
 Thus, a typical subcommand sequence to execute and monitor work might be:
@@ -93,7 +91,7 @@ are for error handling and recovery.
 ### Help on subcommands
 
 Subcommands offer their own inline help when called with no options. 
-We won't repeat them all, but as one example:
+As one example:
 
 ```bash
 $ mdi submit

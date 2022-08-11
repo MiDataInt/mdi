@@ -6,11 +6,12 @@ nav_order: 10
 
 ## {{ page.title }}
 
-Follow these instructions to create an "MDI-centric"
-(as opposed to "suite centric") MDI installation, complete 
-with managers, frameworks, and tool suites.
+Follow these instructions to create a multi-suite MDI installation, 
+complete with managers, frameworks, and tool suites.
 
 ### Clone the MDI repo
+
+From the command line of a Linux server:
 
 ```bash
 git clone https://github.com/MiDataInt/mdi.git
@@ -24,12 +25,12 @@ cd mdi
 ```
 
 Please read the menu options and confirm your installation choice.
-A full installation including Stage 2 apps can take many minutes 
+A full installation including Stage 2 apps will take many minutes 
 to complete. 
 
 ### OPTIONAL: Create an alias to the utility
 
-The following commands will create an alias to the 'mdi' utility
+The following commands will create an alias to the `mdi` utility
 in your new MDI installation for easy access from any folder.
 
 ```bash
@@ -40,7 +41,7 @@ in your new MDI installation for easy access from any folder.
 The second command activates the alias in the current shell also - or 
 simply log back in.
 
-You could also edit your profile to modify $PATH, but
+You could also edit your profile to modify `$PATH`, but
 we prefer aliases since we often maintain multiple MDI installations
 that we refer to by different alias names.
 

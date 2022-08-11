@@ -9,11 +9,11 @@ nav_order: 20
 
 Stage 1 Pipelines each have a set of 
 **actions** - the staged units of work they are intended to accomplish,
-encoded in the pipeline's scripts - 
+encoded in the pipeline's configuration - 
 and **subcommands** - pipeline-level management actions handled by the 
 MDI pipelines framework. 
 
-For example, here is the inline help for the 'svCapture' pipeline.
+For example, here is the inline help for the `svCapture` pipeline.
 
 ```
 $ mdi svCapture
@@ -37,7 +37,7 @@ pipeline specific actions:
   genotype       genotype the bulk capture regions and score SNVs in SV junction sequences
 
 general workflow commands:
-  template       return a template for creating an input-specific 'data.yml' file
+  template       return a template for creating an input-specific `data.yml` file
   conda          create, update, or list the conda environment(s) required by a pipeline
   build          build a pipeline Singularity image and push to a registry
   shell          open a command shell in a pipeline action's runtime environment
@@ -60,7 +60,7 @@ mdi myPipeline do data.yml
 
 ### Job configuration options and templates
 
-We strongly recommend the use of data.yml files to list the sometimes
+We strongly recommend using data.yml files to enter the sometimes
 numerous options for the work you will execute. The **template**
 subcommand makes it easy to create a pre-assembled job configuration file
 for a pipeline for you to modify. 
@@ -79,7 +79,7 @@ is needed!
 Alternatively, developers make calls to the **build** subcommand to create
 and upload pre-assembled Singularity containers carrying the required 
 environment(s) and mark their pipelines as supporting containers 
-for end users to download. Users must have Singularity available on their
+for users to download. Users must have Singularity available on their
 server capable of running (but not building) containers.
 
 Because most shared HPC servers do not support Singularity builds, 
