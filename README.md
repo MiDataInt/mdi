@@ -1,20 +1,13 @@
-# Michigan Data Interface
+# MDI Command Line Installer and Utility
 
 The [Michigan Data Interface](https://midataint.github.io/) (MDI) 
 is a framework for developing, installing and running 
-HPC data analysis pipelines and interactive visualization 
-applications within a standardized design interface.
-
-The MDI is separated into 
-[two stages of code execution](https://midataint.github.io/docs/analysis-flow/) 
-called Stage 1 HPC **pipelines** and Stage 2 web applications (i.e., **apps**).
-Collectively, pipelines and apps are known as **tools**.
-
-## Repository contents
+Stage 1 HPC **pipelines** and Stage 2 interactive web applications 
+(i.e., **apps**) in a standardized design interface.
 
 This repository carries an **installation script** that will 
-set up the MDI on your Linux server with all required components and a proper
-folder structure to support all tools.
+set up the MDI on your Linux server with all required components and 
+a proper folder structure to support all tools.
 
 ## System requirements
 
@@ -40,11 +33,13 @@ Git is still required to download this installer repository.
 
 The Stage 2 web server runs perfectly well on Windows or Mac computers,
 but this installation script will not be useful. Instead,
-either install the MDI using the R 'mdi-manager' package, or 
-download a batch script customized for your computer:
+install either the MDI Desktop or the R 'mdi-manager' package:
 
-- MDI manager: <https://github.com/MiDataInt/mdi-manager.git>
-- batch script generator: <https://wilsonte-umich.shinyapps.io/mdi-script-generator>
+- MDI Desktop (recommended): <https://midataint.github.io/mdi-desktop-app>
+- MDI R package: <https://midataint.github.io/mdi-manager>
+
+In remote modes, the recommended MDI Desktop will install
+and makes calls to the MDI command line utility for you, via SSH. 
 
 ## Install the MDI framework(s)
 
@@ -58,7 +53,7 @@ cd mdi
 ```
 
 Please read the menu options and confirm your installation choice.
-A full installation including Stage 2 apps can take many minutes 
+A full installation including Stage 2 apps will take many minutes 
 to complete.
 
 ## OPTIONAL: Create an alias to the 'mdi' utility
@@ -115,12 +110,9 @@ mdi # if you created an alias above
 
 ## Run the MDI web server
 
-Run the Stage 2 apps web server as follows.
-
-```bash
-mdi server --help
-mdi server
-```
+While you can launch the MDI web server using the command line utility,
+it is much better to use the [MDI Desktop app](https://midataint.github.io/mdi-desktop-app),
+which allows you to control both local and remote MDI web servers.
 
 ## Install and use repository developer forks
 

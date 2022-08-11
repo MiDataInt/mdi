@@ -12,12 +12,15 @@ including installation, management, and pipeline execution.
 
 ### Other ways to call MDI functions
 
-Most commonly, the command line utility described here is only
+The command line utility is only
 used on a Linux server that will run Stage 1 Pipelines.
-The following are some of the other ways MDI tools are accessed:
+Here are some of the other ways MDI tools are accessed:
 
-- MDI R package: <https://github.com/MiDataInt/mdi-manager>
-- MDI batch scripts: <https://wilsonte-umich.shinyapps.io/mdi-script-generator>
+- MDI Desktop (recommended): <https://midataint.github.io/mdi-desktop-app>
+- MDI R package: <https://midataint.github.io/mdi-manager>
 - MDI public web servers: <https://github.com/MiDataInt/mdi-web-server>
+
+In remote modes, the recommended MDI Desktop will install
+and makes calls to the MDI command line utility for you, via SSH. 
 
 {% include mdi-project-documentation.md %}

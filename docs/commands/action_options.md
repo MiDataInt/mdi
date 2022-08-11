@@ -8,7 +8,7 @@ nav_order: 30
 ## {{ page.title }}
 
 Each **action** offered by a pipeline will have a rich set of available **options**. 
-For example, here is the inline help for the 'svCapture align' action.
+For example, here is the inline help for the `svCapture align` action.
 
 ```
 $ mdi svCapture align
@@ -58,11 +58,10 @@ help:
 
 Typically, a pipeline will expose a series of action-specific options. 
 These are listed first and can be specified at the command line in short, 
-e.g., '-i', or long, e.g., '--input-dir', format. 
+e.g., `-i`, or long, e.g., `--input-dir`, format. 
 Long format names are used in data.yml files.
 
-For clarity of organization and ease of reuse, options are organized into "families",
-leading to data.yml files with entries like:
+For clarity of organization and ease of reuse, options are organized into families, leading to data.yml files with entries like:
 
 ```yml
 # data.yml
@@ -74,13 +73,13 @@ align: # the pipeline action
 ### Standard options
 
 Other options are either mandated or offered by the MDI pipelines framework
-and automatically added to all pipeline actions. They are too numerous to 
-repeat here (see above), but two are critically important as they are how all MDI pipelines know where to write their output files:
+and automatically added to all pipeline actions. 
+Two are critically important as they are how all MDI pipelines know where to write their output files:
 
 - **output-dir** = the destination directory for an analysis project
-- **data-name** = the sub-folder in --output-dir for each sample analyzed
+- **data-name** = the sub-folder in `--output-dir` for each sample analyzed
 
-Thus, the following job configuration file snippet:
+Thus, the following job configuration file:
 
 ```yml
 # data.yml
@@ -97,7 +96,11 @@ would write output for two analyzed samples to folders:
 - /project/path/sample_1
 - /project/path/sample_2
 
-Among other useful common options, '--dry-run' allows a 
+By the
+[MDI Code of Conduct](https://midataint.github.io/docs/registry/00_index/#mdi-developer-code-of-conduct),
+pipelines are only allowed to write output files to `--output-dir`.
+
+Among other useful common options, `--dry-run` allows a 
 test of the action and options configuration prior to actual execution.
-Every pipeline can also use parallel processing via options '--n-cpu' and 
-'--ram-per-cpu', if supported by the pipeline developer.
+Every pipeline can also use parallel processing via options `--n-cpu` and 
+`--ram-per-cpu`, if supported by the pipeline developer.
