@@ -64,17 +64,19 @@ function run_mdi_install {
     
     # execute the three step R-based MDI install sequence: remotes, mdi-manager, mdi::install()
     CRAN_REPO=https://repo.miserver.it.umich.edu/cran/
+    R_VERSION=`Rscript --version | perl -ne '$_ =~ m/version\s+(\d+\.\d+)/ and print $1'`
+    LIB_PATH=$MDI_DIR/library/R-$R_VERSION # install remotes and mdi-manager R package here (no Bioconductor suffix)
+    mkdir -p $LIB_PATH
     Rscript -e \
-"x <- 'remotes'; \
+".libPaths('$LIB_PATH'); x <- 'remotes'; \
 if (!require(x, character.only = TRUE)){ \
     Ncpus <- Sys.getenv('N_CPU'); \
     if(Ncpus == '') Ncpus <- 1; \
     message(paste('Ncpus =', Ncpus)); \
     install.packages(x, repos = '$CRAN_REPO', Ncpus = Ncpus) \
 }"
-    Rscript -e "remotes::install_github('MiDataInt/mdi-manager')"
-    Rscript -e "mdi::install('$MDI_DIR', installPackages = $INSTALL_PACKAGES, \
-    confirm = FALSE, checkout=$CHECKOUT)" # permission was granted above
+    Rscript -e ".libPaths('$LIB_PATH'); remotes::install_github('MiDataInt/mdi-manager')"
+    Rscript -e ".libPaths('$LIB_PATH'); mdi::install('$MDI_DIR', installPackages = $INSTALL_PACKAGES, confirm = FALSE, checkout=$CHECKOUT)" # permission was granted above
 }
 
 # -----------------------------------------------------------------------
