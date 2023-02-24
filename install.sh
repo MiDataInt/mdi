@@ -27,7 +27,7 @@ if [ "$ACTION_NUMBER" = "" ]; then
     echo "Stage 2 apps installation may take many minutes. Select option 1 if you"
     echo "do not intend to use interactive web tools from this MDI installation."
     echo
-    echo "Installation will populate this directory and add it to PATH via ~/.bashrc"
+    echo "Installation will populate this directory:
     echo "  $MDI_DIR"
     echo
     echo "For more information, see: https://midataint.github.io/"    
