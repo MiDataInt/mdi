@@ -62,7 +62,7 @@ function run_mdi_install {
         exit 1
     fi
     
-    # execute the three step R-based MDI install sequence: remotes, mdi-manager, mdi::install()
+    # execute the multi-step R-based MDI install sequence: remotes, git2r, mdi-manager, mdi::install()
     CRAN_REPO=https://repo.miserver.it.umich.edu/cran/
     R_VERSION=`Rscript --version | perl -ne '$_ =~ m/version\s+(\d+\.\d+)/ and print $1'`
     LIB_PATH=$MDI_DIR/library/R-$R_VERSION # install remotes and mdi-manager R package here (no Bioconductor suffix)
@@ -75,6 +75,7 @@ if (!require(x, character.only = TRUE)){ \
     message(paste('Ncpus =', Ncpus)); \
     install.packages(x, repos = '$CRAN_REPO', Ncpus = Ncpus) \
 }"
+    Rscript -e ".libPaths('$LIB_PATH'); remotes::install_github('ropensci/git2r', ref = 'v0.33.0')" # enforce last git2r version with embedded libgit2
     Rscript -e ".libPaths('$LIB_PATH'); remotes::install_github('MiDataInt/mdi-manager')"
     Rscript -e ".libPaths('$LIB_PATH'); mdi::install('$MDI_DIR', installPackages = $INSTALL_PACKAGES, confirm = FALSE, checkout=$CHECKOUT)" # permission was granted above
 }
