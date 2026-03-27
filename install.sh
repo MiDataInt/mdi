@@ -67,6 +67,22 @@ function run_mdi_install {
     R_VERSION=`Rscript --version | perl -ne '$_ =~ m/version\s+(\d+\.\d+)/ and print $1'`
     LIB_PATH=$MDI_DIR/library/R-$R_VERSION # install remotes and mdi-manager R package here (no Bioconductor suffix)
     mkdir -p $LIB_PATH
+    IS_LIBGIT2="pkg-config --exists --atleast-version 1.0 libgit2"
+    if $IS_LIBGIT2; then
+        GIT2R_REF="HEAD"
+    else
+        module load libgit2 > /dev/null 2>&1
+        if $IS_LIBGIT2; then
+            GIT2R_REF="HEAD"
+        else
+            module load git > /dev/null 2>&1
+            if $IS_LIBGIT2; then
+                GIT2R_REF="HEAD"
+            else
+                GIT2R_REF="v0.33.0" # fall back to last git2r version with embedded libgit2
+            fi
+        fi
+    fi
     Rscript -e \
 ".libPaths('$LIB_PATH'); x <- 'remotes'; \
 if (!require(x, character.only = TRUE)){ \
@@ -75,7 +91,7 @@ if (!require(x, character.only = TRUE)){ \
     message(paste('Ncpus =', Ncpus)); \
     install.packages(x, repos = '$CRAN_REPO', Ncpus = Ncpus) \
 }"
-    Rscript -e ".libPaths('$LIB_PATH'); remotes::install_github('ropensci/git2r', ref = 'v0.33.0')" # enforce last git2r version with embedded libgit2
+    Rscript -e ".libPaths('$LIB_PATH'); remotes::install_github('ropensci/git2r', ref = '$GIT2R_REF')"
     Rscript -e ".libPaths('$LIB_PATH'); remotes::install_github('MiDataInt/mdi-manager')"
     Rscript -e ".libPaths('$LIB_PATH'); mdi::install('$MDI_DIR', installPackages = $INSTALL_PACKAGES, confirm = FALSE, checkout=$CHECKOUT)" # permission was granted above
 }
