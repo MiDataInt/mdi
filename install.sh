@@ -30,7 +30,7 @@ if [ "$ACTION_NUMBER" = "" ]; then
     echo "Installation will populate this directory:"
     echo "  $MDI_DIR"
     echo
-    echo "For more information, see: https://midataint.github.io/"    
+    echo "For more information, see: https://midataint.github.io/"
     echo
     echo "What would you like to install?"
     echo
@@ -103,12 +103,10 @@ function install_pipelines_no_R { # ... without requiring system R; does not ins
 
     # initialize the MDI directory tree
     echo "initializing the MDI file tree"
+    mkdir -p bin    # populated by Stage 1 pipeline execution
     mkdir -p config # populated below
     mkdir -p data   # unused, this is a pipelines-only installation
     mkdir -p containers   # populated by Stage 1 pipeline execution
-    if [ "$SUITE_NAME" != "" ]; then 
-        mkdir -p containers/$SUITE_NAME/library
-    fi
     mkdir -p environments # populated by Stage 1 pipelines conda create
     mkdir -p frameworks/definitive      # populated below
     mkdir -p frameworks/developer-forks # unused, pipelines-only installation assumed to be an end user
@@ -134,22 +132,24 @@ function install_pipelines_no_R { # ... without requiring system R; does not ins
             git pull
         else
             cd $PARENT_FOLDER
-            git clone https://github.com/$GIT_REPO.git
-            if [ $? -ne 0 ]; then exit 1; fi
-            cd $REPO_NAME
+            if git clone https://github.com/$GIT_REPO.git; then
+                cd $REPO_NAME
+            fi
         fi
-        if [ "$CHECKOUT" = "latest" ]; then
-            CHECKOUT=`
-                git tag | 
-                grep -P '^v\d+\.\d+\.\d+' | 
-                sed -e 's/v//' -e 's/\\./\\t/g' | 
-                sort -k1,1nr -k2,2nr -k3,3nr | 
-                head -n1 | 
-                awk '{print "v"$1"."$2"."$3}'` # the latest tagged version, method robust to all contingencies
-		if [ "$CHECKOUT" = "" ]; then CHECKOUT="main"; fi
+        if [ "$PWD" = "$FOLDER" ];then
+            if [ "$CHECKOUT" = "latest" ]; then
+                CHECKOUT=`
+                    git tag | 
+                    grep -P '^v\d+\.\d+\.\d+' | 
+                    sed -e 's/v//' -e 's/\\./\\t/g' | 
+                    sort -k1,1nr -k2,2nr -k3,3nr | 
+                    head -n1 | 
+                    awk '{print "v"$1"."$2"."$3}'` # the latest tagged version, method robust to all contingencies
+            if [ "$CHECKOUT" = "" ]; then CHECKOUT="main"; fi
+            fi
+            echo "checking out $CHECKOUT"
+            git -c advice.detachedHead=false checkout $CHECKOUT
         fi
-        echo "checking out $CHECKOUT"
-        git -c advice.detachedHead=false checkout $CHECKOUT
         cd $MDI_DIR
     }
     MDI_MANAGER=mdi-manager
@@ -170,18 +170,35 @@ function install_pipelines_no_R { # ... without requiring system R; does not ins
     echo "initializing remote scripts"
     cp -f $MDI_MANAGER/inst/remote/* remote 
 
-    # initialize/update the mdi command line utility   
+    # initialize/update the mdi command line utility
     echo "initializing 'mdi' command line utility"
-    cp -f $MDI_MANAGER/inst/mdi mdi   
+    cp -f $MDI_MANAGER/inst/mdi mdi
     chmod ug+x mdi 
 
-    # clone/pull the definitive framework repositories
+    # determine if there is an active git developer user
+    GIT_USER_DEV=""
+    if [ "$INSTALL_MDI_FORKS" != "" ]; then
+        if [ -f ~/gitCredentials.R ]; then
+            GIT_USER_DEV=$(cat ~/gitCredentials.R 2>/dev/null | grep GIT_USER | sed -e 's/.*GIT_USER\s*=\s*//' -e 's/[",]//g')
+        fi
+        if [ "$GIT_USER_DEV" = "" ]; then
+            echo
+            echo "!!! WARNING: Fork installation requested but ~/gitCredentials.R not found or does not specify GIT_USER !!!"
+            echo "!!! See: https://midataint.github.io/docs/usage/development !!!"
+            echo
+        fi
+    fi 
+
+    # clone/pull the framework repositories
     echo "cloning/updating the mdi framework repositories"
     PIPELINES_FRAMEWORK=mdi-pipelines-framework
     APPS_FRAMEWORK=mdi-apps-framework
-    FRAMEWORKS_DIR=$MDI_DIR/frameworks/definitive
-    updateRepo $FRAMEWORKS_DIR MiDataInt/$PIPELINES_FRAMEWORK latest
-    updateRepo $FRAMEWORKS_DIR MiDataInt/$APPS_FRAMEWORK latest
+    updateRepo $MDI_DIR/frameworks/definitive MiDataInt/$PIPELINES_FRAMEWORK latest
+    updateRepo $MDI_DIR/frameworks/definitive MiDataInt/$APPS_FRAMEWORK latest
+    if [ "$GIT_USER_DEV" != "" ]; then
+        updateRepo $MDI_DIR/frameworks/developer-forks $GIT_USER_DEV/$PIPELINES_FRAMEWORK main
+        updateRepo $MDI_DIR/frameworks/developer-forks $GIT_USER_DEV/$APPS_FRAMEWORK main
+    fi
 
     # clone/pull any tool suites from config.yml
     echo "cloning/updating requested tool suites"
@@ -191,19 +208,22 @@ function install_pipelines_no_R { # ... without requiring system R; does not ins
         sed -e 's/^\s*-\s*//' -e 's/suites:\s*//' -e 's/#.*//' -e "s/^https:\/\/github.com\///" -e "s/\.git$//" | 
         grep "\S"
     `
-    SUITES_DIR=$MDI_DIR/suites/definitive
     for GIT_REPO in $SUITES; do 
         REPO_VERSION=latest # checkout latest unless a version-specific suite-centric build/install
         if [ "$GIT_REPO" = "$GIT_USER/$SUITE_NAME" ] && [ "$SUITE_VERSION" != "" ]; then 
             REPO_VERSION=$SUITE_VERSION
         fi
-        updateRepo $SUITES_DIR $GIT_REPO $REPO_VERSION
+        updateRepo $MDI_DIR/suites/definitive $GIT_REPO $REPO_VERSION
+        if [ "$GIT_USER_DEV" != "" ]; then
+            REPO_NAME=${GIT_REPO##*/}
+            updateRepo $MDI_DIR/suites/developer-forks $GIT_USER_DEV/$REPO_NAME main
+        fi
     done
 
     # clone/pull any additional tool suite dependencies from suite _config.yml files
     echo "cloning/updating tool suite dependencies"
     DEPENDENCIES=`
-        cat $SUITES_DIR/*/_config.yml 2>/dev/null | 
+        cat $MDI_DIR/suites/definitive/*/_config.yml 2>/dev/null | 
         perl -e '
             my $inDep = 0;
             my %suites = map {$_ => 1} split(/\s+/, $ENV{SUITES});
@@ -219,22 +239,30 @@ function install_pipelines_no_R { # ... without requiring system R; does not ins
         uniq
     `
     for GIT_REPO in $DEPENDENCIES; do 
-        updateRepo $SUITES_DIR $GIT_REPO latest
+        updateRepo $MDI_DIR/suites/definitive $GIT_REPO latest
+        if [ "$GIT_USER_DEV" != "" ]; then
+            REPO_NAME=${GIT_REPO##*/}
+            updateRepo $MDI_DIR/suites/developer-forks $GIT_USER_DEV/$REPO_NAME main
+        fi
     done
 
     # initialize the pipelines jobManager
-    JOB_MANAGER_DIR=$FRAMEWORKS_DIR/$PIPELINES_FRAMEWORK/job_manager
+    JOB_MANAGER_DIR=$MDI_DIR/frameworks/definitive/$PIPELINES_FRAMEWORK/job_manager
     perl $JOB_MANAGER_DIR/initialize.pl $MDI_DIR
     if [ $? -ne 0 ]; then exit 1; fi
+    JOB_MANAGER_DIR=$MDI_DIR/frameworks/developer-forks/$PIPELINES_FRAMEWORK/job_manager
+    if [ -f $JOB_MANAGER_DIR/initialize.pl ]; then
+        perl $JOB_MANAGER_DIR/initialize.pl $MDI_DIR
+    fi
 
     # remove tmp mdi-manager clone used for source files - the R mdi package is installed from GitHub
     rm -rf $MDI_MANAGER
 }
 function install_pipelines_only {
-    if [ "$INSTALL_MDI_FORKS" = "" ]; then
-        install_pipelines_no_R # allow end users to bypass R
+    if [ "$INSTALL_WITH_R" = "" ]; then
+        install_pipelines_no_R 
     else 
-        INSTALL_PACKAGES="FALSE" # but developers must have R to coordinate forks using mdi::install
+        INSTALL_PACKAGES="FALSE"
         run_mdi_install
     fi
 }
@@ -269,7 +297,6 @@ function set_singularity_version {
 # -----------------------------------------------------------------------
 if [ "$ACTION_NUMBER" = "1" ]; then
     install_pipelines_only
-    echo DONE
 
 # -----------------------------------------------------------------------
 # Stage 2 apps requested - determine how to install (container vs. system R)
@@ -296,12 +323,14 @@ elif [ "$ACTION_NUMBER" = "2" ]; then
     if [ "$SINGULARITY_VERSION" = "" ]; then 
         INSTALL_PACKAGES="TRUE"
         run_mdi_install
-        echo DONE
 
 # -----------------------------------------------------------------------
-# Singularity found and is suite-centric: nothing to do, will use containerized apps server
+# Singularity found and is suite-centric: install pipelines only
+# nothing to do for apps, will use containerized apps server
 # -----------------------------------------------------------------------
     else 
-        echo "Skipping R package installation in favor of a containerized apps server."
+        install_pipelines_only
+        echo "Skipping R package installation in favor of containerized apps server."
     fi
 fi
+echo DONE
